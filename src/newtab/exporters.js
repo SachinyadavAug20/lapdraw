@@ -221,7 +221,8 @@ async function exportPdf() {
 }
 
 function buildPdf(objs) {
-  const chunks = ["%PDF-1.4\n%\u00E2\u00E3\u00CF\u00D3\n"];
+  // header contains non-ASCII PDF marker bytes — encode as bytes so offsets stay exact
+  const chunks = [new TextEncoder().encode("%PDF-1.4\n%\u00E2\u00E3\u00CF\u00D3\n")];
   const offsets = [];
   for (let i = 0; i < objs.length; i++) {
     offsets.push(chunks.reduce((n, c) => n + c.length, 0));
