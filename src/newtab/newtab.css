@@ -142,6 +142,73 @@ body {
   cursor: pointer;
 }
 
+/* export dropdown */
+.exportmenu {
+  position: fixed;
+  bottom: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  min-width: 210px;
+  padding: 6px;
+  border-radius: 4px;
+  background: rgba(14, 17, 20, 0.96);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+}
+
+.exportmenu.hidden {
+  display: none;
+}
+
+.exportmenu button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text);
+  font: 11.5px/1 var(--font);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.exportmenu button:hover {
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.exportmenu .xmsep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* toast */
+#lapdraw-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  z-index: 30;
+  padding: 8px 14px;
+  border-radius: 3px;
+  background: rgba(14, 17, 20, 0.96);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font: 11.5px/1 var(--font);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+#lapdraw-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .cheatsheet {
   position: fixed;
   inset: 0;

@@ -307,22 +307,6 @@ function paintLive(sx, sy) {
   last = { x: wx, y: wy, mx, my };
 }
 
-// ----- Export -----
-function exportPng() {
-  const out = document.createElement("canvas");
-  const r = dpr();
-  out.width = Math.round(window.innerWidth * r);
-  out.height = Math.round(window.innerHeight * r);
-  const octx = out.getContext("2d");
-  octx.fillStyle = BG;
-  octx.fillRect(0, 0, out.width, out.height);
-  octx.drawImage(canvas, 0, 0);
-  const a = document.createElement("a");
-  a.href = out.toDataURL("image/png");
-  a.download = `lapdraw-canvas-${Date.now()}.png`;
-  a.click();
-}
-
 // ----- Toolbar -----
 document.querySelectorAll("[data-tool]").forEach((b) =>
   b.addEventListener("click", () => {
@@ -342,8 +326,33 @@ sizeEl.addEventListener("input", () => {
 document.getElementById("undo").addEventListener("click", () => undo());
 document.getElementById("redo").addEventListener("click", () => redo());
 document.getElementById("clear").addEventListener("click", () => clearAll());
-document.getElementById("save").addEventListener("click", exportPng);
-document.getElementById("fit").addEventListener("click", () => fitContent());
+document.getElementById("exportBtn").addEventListener("click", () =>
+  document.getElementById("exportMenu").classList.toggle("hidden")
+);
+document.querySelectorAll("[data-x]").forEach((b) =>
+  b.addEventListener("click", () => {
+    document.getElementById("exportMenu").classList.add("hidden");
+    const act = {
+      png: exportPngArtwork,
+      viewport: exportViewportPng,
+      jpg: exportJpg,
+      svg: exportSvg,
+      pdf: exportPdf,
+      copy: copyImage,
+      "project-save": exportProject,
+      "project-open": importProject
+    }[b.dataset.x];
+    if (act) act();
+  })
+);
+
+// close export menu when clicking elsewhere
+window.addEventListener("pointerdown", (e) => {
+  const menu = document.getElementById("exportMenu");
+  if (!menu.classList.contains("hidden") && !e.target.closest("#exportMenu, #exportBtn")) {
+    menu.classList.add("hidden");
+  }
+});
 document.getElementById("zen").addEventListener("click", () => hud.classList.toggle("zen"));
 document.getElementById("help").addEventListener("click", () => cheatsheet.classList.toggle("hidden"));
 
@@ -391,7 +400,7 @@ window.addEventListener("keydown", (e) => {
 
   if (mod && key === "z" && !e.shiftKey) return undo(), e.preventDefault();
   if ((mod && key === "z" && e.shiftKey) || (mod && key === "y")) return redo(), e.preventDefault();
-  if (mod && key === "s") return exportPng(), e.preventDefault();
+  if (mod && key === "s") return exportPngArtwork(), e.preventDefault();
   if (mod && e.shiftKey && key === "x") return clearAll(), e.preventDefault();
   if (mod && key === "1") return (view = { x: 0, y: 0, z: 1 }, redraw(), e.preventDefault());
   if (mod && (key === "0" || key === "=")) return fitContent(), e.preventDefault();
@@ -414,7 +423,7 @@ window.addEventListener("keydown", (e) => {
       sizeEl.value = String(Math.min(40, Number(sizeEl.value) + 2));
       sizeEl.dispatchEvent(new Event("input")); break;
     case "s":
-      exportPng(); break;
+      exportPngArtwork(); break;
     case "0":
       fitContent(); break;
     case "+":

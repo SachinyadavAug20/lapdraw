@@ -22,16 +22,28 @@
         <button class="chip" id="redo" title="Redo (Ctrl+Shift+Z / Ctrl+Y)">↪</button>
         <button class="chip" id="clear" title="Clear canvas">Clear</button>
         <div class="sep"></div>
-        <button class="chip" id="save" title="Save PNG (Ctrl+S)">💾 Save</button>
+        <button class="chip" id="exportBtn" title="Export (PNG · JPG · SVG · PDF · clipboard · project)">⬇ Export ▾</button>
         <button class="chip" id="fit" title="Fit all content (0)">🎯 Fit</button>
         <button class="chip" id="zen" title="Toggle toolbar (Tab)">🫥</button>
-        <button class="chip" id="help" title="Shortcuts (?)">?</button>
+        <button class="chip" id="help" title="Shortcuts + tutorial (?)">?</button>
       </div>
       <p class="help">
         ✍️ click-drag draws · 🖐 two-finger scroll pans · pinch / Ctrl+scroll zooms ·
         Space+drag pans · auto-saves
       </p>
       <span id="zoom" class="zoom">100%</span>
+    </div>
+
+    <div id="exportMenu" class="exportmenu hidden">
+      <button data-x="png">🖼 PNG — full artwork</button>
+      <button data-x="viewport">🖥 PNG — what you see</button>
+      <button data-x="jpg">🌉 JPG</button>
+      <button data-x="svg">⛓ SVG (vector)</button>
+      <button data-x="pdf">📄 PDF</button>
+      <button data-x="copy">📋 Copy image</button>
+      <div class="xmsep"></div>
+      <button data-x="project-save">💾 Save .lapboard project</button>
+      <button data-x="project-open">📂 Open .lapboard…</button>
     </div>
 
     <div id="cheatsheet" class="cheatsheet hidden">
@@ -51,6 +63,7 @@
       <p class="tip">Everything auto-saves in this tab. Fit (0) centers all your content.</p>
     </div>
 
+    <script src="exporters.js"></script>
     <script src="newtab.js"></script>
   </body>
 </html>
