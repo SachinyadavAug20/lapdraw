@@ -21,18 +21,18 @@ const STEPS = [
   },
   {
     id: "tools",
-    title: "Shapes",
-    body: "Pick ✏ pen, 🧽 eraser, 📐 line, ▭ rect, ◯ ellipse in the toolbar. Hold Shift to snap 45° lines, squares and circles."
+    title: "Shapes & QuickShape",
+    body: "Pick PEN, ERS, LIN, BOX, OVL, ARR, TXT. Draw any rough line or box and hold still for 450ms — QuickShape snaps it clean!"
   },
   {
     id: "undo",
-    title: "History",
-    body: "Ctrl+Z undoes, Ctrl+Shift+Z (or Ctrl+Y) redoes. X clears everything."
+    title: "History & Toggles",
+    body: "Ctrl+Z undoes, Ctrl+Shift+Z redoes. M toggles Smart Assist, G toggles Grid Snap."
   },
   {
     id: "export",
-    title: "Export anything",
-    body: "⬇ Export → PNG / JPG / SVG vector / PDF / clipboard / .lapboard project files. Your board auto-saves locally too."
+    title: "Developer Export",
+    body: "EXP ▾ → Copy SVG markup, Copy React TSX component, Copy image, PDF, or save .lapboard project files."
   },
   {
     id: "keys",

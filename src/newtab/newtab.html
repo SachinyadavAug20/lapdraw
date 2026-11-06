@@ -10,60 +10,90 @@
 
     <div class="hud">
       <div class="bar">
-        <button class="chip" data-tool="pen" title="Pen (P)">✏ Pen</button>
-        <button class="chip" data-tool="eraser" title="Eraser (E)">🧽</button>
-        <button class="chip" data-tool="line" title="Line (L)">📐</button>
-        <button class="chip" data-tool="rect" title="Rectangle (R + hold Shift for square)">▭</button>
-        <button class="chip" data-tool="ellipse" title="Ellipse (O + hold Shift for circle)">◯</button>
-        <input id="color" type="color" value="#ff5c5c" title="Color" />
-        <input id="size" type="range" min="1" max="40" value="4" title="Size ( [ / ] )" />
+        <button class="chip tl" data-tool="pen" title="Pen (P) — freehand or hold at end to snap shapes">PEN</button>
+        <button class="chip tl" data-tool="eraser" title="Eraser (E)">ERS</button>
+        <button class="chip tl" data-tool="line" title="Straight line (L)">LIN</button>
+        <button class="chip tl" data-tool="rect" title="Rectangle / Box (R)">BOX</button>
+        <button class="chip tl" data-tool="ellipse" title="Ellipse / Circle (O)">OVL</button>
+        <button class="chip tl" data-tool="arrow" title="Connector arrow (A)">ARR</button>
+        <button class="chip tl" data-tool="text" title="Text label (T)">TXT</button>
         <div class="sep"></div>
-        <button class="chip" id="undo" title="Undo (Ctrl+Z)">↩</button>
-        <button class="chip" id="redo" title="Redo (Ctrl+Shift+Z / Ctrl+Y)">↪</button>
-        <button class="chip" id="clear" title="Clear canvas">Clear</button>
+        <div class="palette" title="Developer Palette">
+          <button class="dot" data-color="#ff5c50" style="--c:#ff5c50" title="Coral"></button>
+          <button class="dot" data-color="#ffb547" style="--c:#ffb547" title="Amber"></button>
+          <button class="dot" data-color="#ffd60a" style="--c:#ffd60a" title="Yellow"></button>
+          <button class="dot" data-color="#74c69d" style="--c:#74c69d" title="Green"></button>
+          <button class="dot" data-color="#64a8ff" style="--c:#64a8ff" title="Blue"></button>
+          <button class="dot" data-color="#b48ce8" style="--c:#b48ce8" title="Purple"></button>
+          <button class="dot" data-color="#e6e9ee" style="--c:#e6e9ee" title="White"></button>
+          <button class="dot" data-color="#77828e" style="--c:#77828e" title="Muted"></button>
+        </div>
+        <input id="color" type="color" value="#ff5c50" title="Custom color" />
+        <input id="size" type="range" min="1" max="40" value="4" title="Stroke size ( [ / ] )" />
         <div class="sep"></div>
-        <button class="chip" id="exportBtn" title="Export (PNG · JPG · SVG · PDF · clipboard · project)">⬇ Export ▾</button>
-        <button class="chip" id="fit" title="Fit all content (0)">🎯 Fit</button>
-        <button class="chip" id="zen" title="Toggle toolbar (Tab)">🫥</button>
-        <button class="chip" id="help" title="Shortcuts + tutorial (?)">?</button>
+        <button class="chip tl" id="toggleSmart" title="Smart Shape Assist (M) — auto-straightens lines, boxes & circles">SMART</button>
+        <button class="chip tl" id="toggleSnap" title="Grid Snap (G) — snap coordinates to 16px grid">SNAP</button>
+        <div class="sep"></div>
+        <button class="chip icon" id="undo" title="Undo (Ctrl+Z)">↩</button>
+        <button class="chip icon" id="redo" title="Redo (Ctrl+Shift+Z)">↪</button>
+        <button class="chip tl" id="clear" title="Clear canvas (Ctrl+Shift+X)">CLR</button>
+        <div class="sep"></div>
+        <button class="chip tl" id="exportBtn" title="Export PNG · JPG · SVG · PDF · Code · Project">EXP&nbsp;<span class="caret">▾</span></button>
+        <button class="chip tl" id="fit" title="Fit content (0)">FIT</button>
+        <button class="chip icon" id="zen" title="Toggle toolbar (Tab)">−</button>
+        <button class="chip icon" id="help" title="Cheat sheet + tutorial (?)">?</button>
       </div>
-      <p class="help">
-        ✍️ click-drag draws · 🖐 two-finger scroll pans · pinch / Ctrl+scroll zooms ·
-        Space+drag pans · auto-saves
-      </p>
+      <p class="help">click-drag draws · hold still 450ms = QuickShape · two-finger scroll pans · pinch zooms · <b>Shift</b>=snap</p>
       <span id="zoom" class="zoom">100%</span>
     </div>
 
+    <div id="statusbar" class="statusbar">
+      <span class="mode">LAPDRAW</span>
+      <span id="sb-strokes">0 strokes · 0 pts</span>
+      <span id="sb-smart" class="sb-tag on">✦ SMART: ON</span>
+      <span id="sb-snap" class="sb-tag">SNAP: OFF</span>
+      <span id="sb-saved">saved</span>
+      <span class="sb-right">
+        <span id="sb-tool">pen</span> · <span id="sb-size">4px</span> · <span id="sb-zoom">100%</span>
+      </span>
+    </div>
+
     <div id="exportMenu" class="exportmenu hidden">
-      <button data-x="png">🖼 PNG — full artwork</button>
-      <button data-x="viewport">🖥 PNG — what you see</button>
-      <button data-x="jpg">🌉 JPG</button>
-      <button data-x="svg">⛓ SVG (vector)</button>
-      <button data-x="pdf">📄 PDF</button>
-      <button data-x="copy">📋 Copy image</button>
+      <button data-x="png">PNG · full artwork</button>
+      <button data-x="viewport">PNG · what you see</button>
+      <button data-x="jpg">JPG · compressed</button>
+      <button data-x="svg">SVG · vector file</button>
+      <button data-x="pdf">PDF · document</button>
       <div class="xmsep"></div>
-      <button data-x="project-save">💾 Save .lapboard project</button>
-      <button data-x="project-open">📂 Open .lapboard…</button>
+      <button data-x="copy">Copy · PNG image to clipboard</button>
+      <button data-x="copy-svg">Copy · SVG code <span class="dev">&lt;svg&gt;</span></button>
+      <button data-x="copy-react">Copy · React component <span class="dev">.tsx</span></button>
+      <button data-x="copy-md">Copy · Markdown embed <span class="dev">![]()</span></button>
+      <div class="xmsep"></div>
+      <button data-x="project-save">Save .lapboard project</button>
+      <button data-x="project-open">Open .lapboard…</button>
     </div>
 
     <div id="cheatsheet" class="cheatsheet hidden">
-      <h2>LapDraw Canvas — Shortcuts</h2>
+      <h2>LapDraw Canvas — Developer Shortcuts</h2>
       <table>
         <tr><td>Draw</td><td>click-drag (trackpad / mouse / pen)</td></tr>
+        <tr><td>QuickShape</td><td>draw and hold still for 450ms at end to snap straight lines / boxes / circles / arrows</td></tr>
         <tr><td>Pan</td><td>two-finger scroll · Space+drag · Shift+drag · middle-drag · arrow keys</td></tr>
         <tr><td>Zoom</td><td>pinch or Ctrl+scroll · + / − · Ctrl+1 = 100% · 0 or Ctrl+0 = fit</td></tr>
-        <tr><td>Pen / Eraser</td><td>P / E</td></tr>
-        <tr><td>Stroke size</td><td>[ / ]</td></tr>
+        <tr><td>Tools</td><td>P pen · E eraser · L line · R rect · O ellipse · A arrow · T text</td></tr>
+        <tr><td>Toggles</td><td>M smart assist · G grid snap · Tab zen mode</td></tr>
+        <tr><td>Stroke size</td><td>[ shrink · ] grow</td></tr>
         <tr><td>Undo / Redo</td><td>Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)</td></tr>
-        <tr><td>Save PNG</td><td>S or Ctrl+S</td></tr>
+        <tr><td>Quick Save</td><td>S or Ctrl+S (PNG artwork)</td></tr>
         <tr><td>Clear canvas</td><td>Ctrl+Shift+X</td></tr>
-        <tr><td>Hide toolbar</td><td>Tab (press again to bring back)</td></tr>
-        <tr><td>This cheat sheet</td><td>? or H</td></tr>
+        <tr><td>This cheat sheet</td><td>? or H · Esc closes</td></tr>
       </table>
-      <p class="tip">Everything auto-saves in this tab. Fit (0) centers all your content.</p>
+      <p class="tip">All shortcuts are configurable: open LapDraw icon → ⚙ KEYS.</p>
       <p class="tip"><button class="tut-replay" id="replayTutorial">🎓 Replay tutorial</button></p>
     </div>
 
+    <script src="../shared/intelligence.js"></script>
     <script src="exporters.js"></script>
     <script src="newtab.js"></script>
     <script src="tutorial.js"></script>
