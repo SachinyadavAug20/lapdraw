@@ -1,0 +1,135 @@
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  width: 268px;
+  padding: 12px;
+  background: #14151a;
+  color: #e8e8ec;
+  font: 13px/1.4 system-ui, -apple-system, sans-serif;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.head h1 {
+  font-size: 15px;
+  margin: 0;
+  flex: 1;
+}
+
+.status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #3a3b42;
+  color: #bbb;
+}
+
+.status.on {
+  background: #1d6b3c;
+  color: #8df0ae;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.row.tools,
+.row.mini {
+  gap: 6px;
+}
+
+.primary {
+  flex: 1;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 10px;
+  background: #4c8dff;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primary:hover {
+  background: #649cff;
+}
+
+.primary.alt {
+  background: #2d3140;
+}
+
+.primary.alt:hover {
+  background: #394054;
+}
+
+.chip {
+  padding: 6px 10px;
+  border: 1px solid #34353d;
+  border-radius: 8px;
+  background: #1d1e24;
+  color: #d5d5dc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: #4c8dff;
+}
+
+.chip.active {
+  background: #4c8dff;
+  border-color: #4c8dff;
+  color: #fff;
+}
+
+.lbl {
+  font-size: 11px;
+  color: #9a9aa4;
+}
+
+#color {
+  width: 30px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #34353d;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+#size {
+  flex: 1;
+  accent-color: #4c8dff;
+}
+
+.sizeVal {
+  width: 18px;
+  text-align: right;
+  font-size: 11px;
+  color: #9a9aa4;
+}
+
+.foot {
+  display: block;
+  border-top: 1px solid #26272e;
+  padding-top: 10px;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 10.5px;
+  color: #7d7d86;
+}

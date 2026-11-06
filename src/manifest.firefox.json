@@ -1,0 +1,47 @@
+{
+  "manifest_version": 2,
+  "name": "LapDraw — Trackpad Drawing",
+  "version": "0.1.0",
+  "description": "Draw on any website with your laptop trackpad, or open an infinite canvas in a new tab. Built for people without a pen or mouse.",
+  "permissions": ["activeTab", "storage", "tabs", "<all_urls>"],
+  "browser_action": {
+    "default_title": "LapDraw",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content.js"],
+      "css": ["content/overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "commands": {
+    "toggle-draw": {
+      "suggested_key": { "default": "Alt+Shift+D" },
+      "description": "Toggle LapDraw drawing mode on the current page"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lapdraw@sachin.dev",
+      "strict_min_version": "109.0"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

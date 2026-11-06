@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LapDraw Canvas</title>
+    <link rel="stylesheet" href="newtab.css" />
+  </head>
+  <body>
+    <canvas id="board"></canvas>
+
+    <div class="hud">
+      <div class="bar">
+        <button class="chip" data-tool="pen" title="Pen (P)">✏ Pen</button>
+        <button class="chip" data-tool="eraser" title="Eraser (E)">🧽</button>
+        <input id="color" type="color" value="#ff5c5c" title="Color" />
+        <input id="size" type="range" min="1" max="40" value="4" title="Size ( [ / ] )" />
+        <div class="sep"></div>
+        <button class="chip" id="undo" title="Undo (Ctrl+Z)">↩ Undo</button>
+        <button class="chip" id="clear" title="Clear canvas">Clear</button>
+        <div class="sep"></div>
+        <button class="chip" id="save" title="Save PNG (S)">💾 Save</button>
+        <button class="chip" id="resetView" title="Reset view (0)">🎯 Fit</button>
+      </div>
+      <p class="help">
+        ✍️ draw with trackpad click-drag · 🖐 two-finger scroll to pan · pinch or Ctrl+scroll to zoom ·
+        everything auto-saves in this tab
+      </p>
+      <span id="zoom" class="zoom">100%</span>
+    </div>
+
+    <script src="newtab.js"></script>
+  </body>
+</html>

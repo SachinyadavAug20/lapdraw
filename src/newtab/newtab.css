@@ -1,0 +1,106 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #101116;
+  font: 13px/1.4 system-ui, -apple-system, sans-serif;
+  color: #e8e8ec;
+  /* subtle infinite-grid backdrop */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+#board {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+#board.panning {
+  cursor: grabbing;
+}
+
+.hud {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 10;
+}
+
+.bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: rgba(18, 18, 22, 0.92);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #ddd;
+  font: 12px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.chip.active {
+  background: #4c8dff;
+  color: #fff;
+}
+
+#color {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+#size {
+  width: 90px;
+  accent-color: #4c8dff;
+}
+
+.sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 2px;
+}
+
+.help {
+  margin: 8px auto 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(18, 18, 22, 0.72);
+  padding: 4px 12px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.zoom {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}

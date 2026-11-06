@@ -1,0 +1,12 @@
+{
+  "name": "lapdraw",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser extension: draw on any website with your trackpad, plus an infinite canvas in a new tab.",
+  "type": "module",
+  "scripts": {
+    "icons": "node scripts/gen-icons.mjs",
+    "build": "npm run icons && node scripts/build.mjs",
+    "lint": "npx web-ext lint -s dist/chrome && true"
+  }
+}

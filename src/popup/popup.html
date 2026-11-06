@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <span class="logo">✍️</span>
+      <h1>LapDraw</h1>
+      <span id="status" class="status">off</span>
+    </header>
+
+    <section class="row">
+      <button id="toggle" class="primary">Draw on this page</button>
+    </section>
+
+    <section class="row tools">
+      <button class="chip" data-tool="pen" title="Pen">✏ Pen</button>
+      <button class="chip" data-tool="eraser" title="Eraser">🧽 Eraser</button>
+    </section>
+
+    <section class="row">
+      <label class="lbl">Color</label>
+      <input id="color" type="color" value="#ff5c5c" />
+      <label class="lbl">Size</label>
+      <input id="size" type="range" min="1" max="30" value="4" />
+      <span id="sizeVal" class="sizeVal">4</span>
+    </section>
+
+    <section class="row mini">
+      <button class="chip" data-act="undo" title="Undo">↩ Undo</button>
+      <button class="chip" data-act="clear" title="Clear all strokes">Clear</button>
+      <button class="chip" data-act="save" title="Save page + drawing as PNG">💾 Save</button>
+    </section>
+
+    <footer class="row foot">
+      <button id="openCanvas" class="primary alt">🗺 Open Infinite Canvas</button>
+      <p class="hint">Shortcut: Alt+Shift+D toggles drawing · Esc exits · U undo · X clear · S save</p>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
