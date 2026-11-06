@@ -115,7 +115,8 @@ Google reviewers inspect your permission justifications closely under the **Sing
 ### Step 3: Upload the Add-on Package
 1. Upload `dist/lapdraw-firefox-v0.4.0.zip`.
 2. The AMO automated validator will inspect the manifest, permissions, and scripts.
-   - Note: In `src/manifest.firefox.json`, `gecko.id` is already configured as `"lapdraw@sachin.dev"`.
+   - Note: In `src/manifest.firefox.json`, `gecko.id` is configured as `"lapdraw@sachin.dev"`.
+   - Built-in Data Consent: Mozilla mandates `browser_specific_settings.gecko.data_collection_permissions` with `"required": ["none"]` and `"strict_min_version": "142.0"` for all new add-on submissions. This is fully configured and passes validation with 0 errors.
 3. **Source Code Question**:
    - The validator will ask: *"Does your extension contain minified, concatenated, or obfuscated source code?"*
    - Select: **"No"**.

@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   switch (msg && msg.type) {
     case "lapdraw:capture": {
       // Screenshot of the current viewport (used to compose page drawings for export)
-      const windowId = sender.tab ? sender.tab.windowId : chrome.windows.W_ID_CURRENT;
+      const windowId = sender.tab ? sender.tab.windowId : null;
       chrome.tabs.captureVisibleTab(windowId, { format: "png" }, (dataUrl) => {
         const err = chrome.runtime.lastError;
         if (err) sendResponse({ error: err.message });
