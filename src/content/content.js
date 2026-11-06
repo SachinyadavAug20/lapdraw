@@ -1,11 +1,9 @@
 // LapDraw content script — draws on the current page with the trackpad.
-// Design notes for trackpad-first UX:
-//  - Pointer events (works for trackpad click-drag, mouse, pen, touch)
-//  - Strokes are stored in CSS pixels so they stay anchored while the page scrolls
-//  - Midpoint quadratic smoothing for low-lag, "stylus-like" strokes with hardware mice
+// Trackpad-first UX with QuickShape hold-to-snap, streamline smoothing, and diagramming tools.
 
 (() => {
   const STATUS_KEY = "lapdraw:enabled";
+  const PREFS_KEY = "lapdraw:prefs";
   const root = document.createElement("div");
   root.id = "lapdraw-root";
 
@@ -15,21 +13,31 @@
   const toolbar = document.createElement("div");
   toolbar.className = "lapdraw-toolbar";
   toolbar.innerHTML = `
-    <button class="lapdraw-btn" data-act="pen" title="Pen">✏ Pen</button>
-    <button class="lapdraw-btn" data-act="eraser" title="Eraser">🧽</button>
-    <input class="lapdraw-color" type="color" value="#ff5c5c" title="Color" />
-    <input class="lapdraw-size" type="range" min="1" max="30" step="1" value="4" title="Stroke size" />
+    <button class="lapdraw-btn" data-act="pen" title="Pen (P)">PEN</button>
+    <button class="lapdraw-btn" data-act="eraser" title="Eraser (E)">ERS</button>
+    <button class="lapdraw-btn" data-act="line" title="Line (L)">LIN</button>
+    <button class="lapdraw-btn" data-act="rect" title="Box / Rect (R)">BOX</button>
+    <button class="lapdraw-btn" data-act="arrow" title="Arrow (A)">ARR</button>
+    <button class="lapdraw-btn" data-act="text" title="Text (T)">TXT</button>
+    <input class="lapdraw-color" type="color" value="#ff5c50" title="Color" />
+    <input class="lapdraw-size" type="range" min="1" max="30" step="1" value="4" title="Stroke size ( [ / ] )" />
+    <div class="lapdraw-sep"></div>
+    <button class="lapdraw-btn" id="overlaySmart" data-act="smart" title="Smart Shape Assist (M)">SMART</button>
     <div class="lapdraw-sep"></div>
     <button class="lapdraw-btn" data-act="undo" title="Undo (U / Ctrl+Z)">↩</button>
     <button class="lapdraw-btn" data-act="redo" title="Redo (R / Ctrl+Shift+Z)">↪</button>
-    <button class="lapdraw-btn" data-act="clear" title="Clear (X)">Clear</button>
-    <button class="lapdraw-btn" data-act="save" title="Save PNG (S)">💾 Save</button>
+    <button class="lapdraw-btn" data-act="clear" title="Clear (X)">CLR</button>
+    <button class="lapdraw-btn" data-act="save" title="Save PNG (S)">PNG</button>
+    <button class="lapdraw-btn" data-act="copy" title="Copy PNG to Clipboard">COPY</button>
     <div class="lapdraw-sep"></div>
     <button class="lapdraw-btn" data-act="off" title="Turn off (Esc)">✕</button>
   `;
 
+  const toastEl = document.createElement("div");
+  toastEl.className = "lapdraw-overlay-toast";
   root.appendChild(canvas);
   root.appendChild(toolbar);
+  root.appendChild(toastEl);
   document.documentElement.appendChild(root);
 
   const ctx = canvas.getContext("2d");
@@ -39,19 +47,38 @@
   let enabled = sessionStorage.getItem(STATUS_KEY) === "1";
   let drawing = false;
   let current = null; // stroke being drawn
-  let strokes = []; // committed strokes: {tool, color, size, points:[{x,y}]}
-  let last = null; // last drawn point {x,y,midx,midy}
-  let settings = { color: "#ff5c5c", size: 4, tool: "pen" };
+  let strokes = [];   // committed strokes
+  let last = null;    // last drawn point
+  let settings = { color: "#ff5c50", size: 4, tool: "pen" };
+  let smartAssist = true;
+  let redoStack = [];
+
+  let holdTimer = null;
+  let holdAnchor = null;
+  let activeTextInput = null;
 
   const dpr = () => window.devicePixelRatio || 1;
+  const isShape = (tool) => tool === "line" || tool === "rect" || tool === "ellipse" || tool === "arrow";
+
+  let toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+  }
 
   function syncControls() {
     colorEl.value = settings.color;
     sizeEl.value = String(settings.size);
-    toolbar.querySelectorAll('[data-act="pen"],[data-act="eraser"]').forEach((b) =>
-      b.classList.toggle("active", b.dataset.act === settings.tool)
-    );
-    root.style.setProperty("--lapdraw-color", settings.color);
+    toolbar.querySelectorAll("[data-act]").forEach((b) => {
+      const act = b.dataset.act;
+      if (["pen", "eraser", "line", "rect", "arrow", "text"].includes(act)) {
+        b.classList.toggle("active", act === settings.tool);
+      }
+    });
+    const smartBtn = toolbar.querySelector("#overlaySmart");
+    if (smartBtn) smartBtn.classList.toggle("toggle-on", smartAssist);
   }
 
   function resizeCanvas() {
@@ -62,34 +89,75 @@
     redraw();
   }
 
-  function strokePath(stroke, from) {
+  function renderStrokeOn(stroke, c) {
     const isEraser = stroke.tool === "eraser";
-    ctx.save();
-    ctx.globalCompositeOperation = isEraser ? "destination-out" : "source-over";
-    ctx.strokeStyle = isEraser ? "rgba(0,0,0,1)" : stroke.color;
-    ctx.lineWidth = stroke.size * (isEraser ? 3 : 1);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.beginPath();
-    const pts = stroke.points;
-    const start = from || 0;
-    ctx.moveTo(pts[start].x, pts[start].y);
-    if (pts.length === start + 1) {
-      ctx.lineTo(pts[start].x + 0.01, pts[start].y + 0.01); // dots need a segment
+    c.save();
+    c.globalCompositeOperation = isEraser ? "destination-out" : "source-over";
+    c.strokeStyle = isEraser ? "rgba(0,0,0,1)" : stroke.color;
+    c.lineWidth = stroke.size * (isEraser ? 3 : 1);
+    c.lineCap = "round";
+    c.lineJoin = "round";
+
+    if (stroke.tool === "text") {
+      const fs = Math.max(12, stroke.size * 3);
+      c.font = `${fs}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+      c.fillStyle = isEraser ? "rgba(0,0,0,1)" : stroke.color;
+      c.fillText(stroke.text || "", stroke.x, stroke.y);
+      c.restore();
+      return;
     }
-    for (let i = start + 1; i < pts.length; i++) {
-      const midX = (pts[i - 1].x + pts[i].x) / 2;
-      const midY = (pts[i - 1].y + pts[i].y) / 2;
-      ctx.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, midX, midY);
-      if (i === pts.length - 1) ctx.lineTo(pts[i].x, pts[i].y);
+
+    if (isShape(stroke.tool)) {
+      c.beginPath();
+      if (stroke.tool === "line") {
+        c.moveTo(stroke.x1, stroke.y1);
+        c.lineTo(stroke.x2, stroke.y2);
+        c.stroke();
+      } else if (stroke.tool === "arrow") {
+        c.moveTo(stroke.x1, stroke.y1);
+        c.lineTo(stroke.x2, stroke.y2);
+        c.stroke();
+        const ang = Math.atan2(stroke.y2 - stroke.y1, stroke.x2 - stroke.x1);
+        const head = Math.max(8, stroke.size * 3);
+        c.beginPath();
+        c.moveTo(stroke.x2, stroke.y2);
+        c.lineTo(stroke.x2 - head * Math.cos(ang - Math.PI / 6), stroke.y2 - head * Math.sin(ang - Math.PI / 6));
+        c.lineTo(stroke.x2 - head * Math.cos(ang + Math.PI / 6), stroke.y2 - head * Math.sin(ang + Math.PI / 6));
+        c.closePath();
+        c.fillStyle = isEraser ? "rgba(0,0,0,1)" : stroke.color;
+        c.fill();
+      } else if (stroke.tool === "rect") {
+        c.strokeRect(
+          Math.min(stroke.x1, stroke.x2),
+          Math.min(stroke.y1, stroke.y2),
+          Math.abs(stroke.x2 - stroke.x1),
+          Math.abs(stroke.y2 - stroke.y1)
+        );
+      }
+      c.restore();
+      return;
     }
-    ctx.stroke();
-    ctx.restore();
+
+    if (stroke.points && stroke.points.length) {
+      c.beginPath();
+      const pts = stroke.points;
+      c.moveTo(pts[0].x, pts[0].y);
+      if (pts.length === 1) c.lineTo(pts[0].x + 0.01, pts[0].y + 0.01);
+      for (let i = 1; i < pts.length; i++) {
+        const midX = (pts[i - 1].x + pts[i].x) / 2;
+        const midY = (pts[i - 1].y + pts[i].y) / 2;
+        c.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, midX, midY);
+        if (i === pts.length - 1) c.lineTo(pts[i].x, pts[i].y);
+      }
+      c.stroke();
+    }
+    c.restore();
   }
 
   function redraw() {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    strokes.forEach((s) => strokePath(s));
+    for (const s of strokes) renderStrokeOn(s, ctx);
+    if (current) renderStrokeOn(current, ctx);
   }
 
   function setEnabled(on) {
@@ -99,63 +167,216 @@
     if (enabled) {
       resizeCanvas();
       syncControls();
+    } else {
+      if (activeTextInput) {
+        activeTextInput.remove();
+        activeTextInput = null;
+      }
     }
   }
 
-  function toggle() {
-    setEnabled(!enabled);
+  // Text input for overlay
+  function spawnOverlayTextInput(x, y) {
+    if (activeTextInput) activeTextInput.remove();
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "lapdraw-text-input";
+    input.placeholder = "type note… (Enter to save)";
+    input.style.left = `${x}px`;
+    input.style.top = `${y - 12}px`;
+    input.style.color = settings.color;
+    root.appendChild(input);
+    input.focus();
+    activeTextInput = input;
+
+    const commit = () => {
+      const txt = input.value.trim();
+      if (txt) {
+        strokes.push({
+          tool: "text",
+          color: settings.color,
+          size: settings.size,
+          x,
+          y,
+          text: txt
+        });
+        redraw();
+        toast("Added note");
+      }
+      input.remove();
+      activeTextInput = null;
+    };
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commit();
+      } else if (e.key === "Escape") {
+        input.remove();
+        activeTextInput = null;
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      setTimeout(commit, 50);
+    });
   }
 
-  // ----- Pointer handling -----
-  function pos(e) {
-    return { x: e.clientX, y: e.clientY };
+  function triggerOverlayQuickShape() {
+    if (!current || current.tool !== "pen" || current.isSnapped) return;
+    if (!current.points || current.points.length < 5) return;
+    if (typeof LapDrawIntelligence !== "undefined") {
+      const shape = LapDrawIntelligence.recognizeShape(current.points);
+      if (shape) {
+        current = {
+          tool: shape.type,
+          color: current.color,
+          size: current.size,
+          x1: shape.x1,
+          y1: shape.y1,
+          x2: shape.x2,
+          y2: shape.y2,
+          isSnapped: true,
+          shift: false
+        };
+        redraw();
+        toast(`✦ QuickShape: ${shape.type.toUpperCase()}`);
+      }
+    }
   }
 
+  // ----- Pointer Drawing Events -----
   canvas.addEventListener("pointerdown", (e) => {
-    if (!enabled || e.button !== 0) return;
-    e.preventDefault();
+    if (e.button !== 0) return;
     canvas.setPointerCapture(e.pointerId);
+
+    if (settings.tool === "text") {
+      spawnOverlayTextInput(e.clientX, e.clientY);
+      return;
+    }
+
     drawing = true;
     redoStack = [];
-    current = {
-      tool: settings.tool,
-      color: settings.color,
-      size: Number(sizeEl.value),
-      points: [pos(e)]
-    };
+    const tool = settings.tool;
+
+    current = isShape(tool)
+      ? {
+          tool,
+          color: settings.color,
+          size: settings.size,
+          x1: e.clientX,
+          y1: e.clientY,
+          x2: e.clientX,
+          y2: e.clientY,
+          shift: e.shiftKey
+        }
+      : {
+          tool,
+          color: settings.color,
+          size: settings.size,
+          points: [{ x: e.clientX, y: e.clientY }],
+          isSnapped: false
+        };
+
     last = null;
-    ctx.save();
-    ctx.globalCompositeOperation = current.tool === "eraser" ? "destination-out" : "source-over";
-    ctx.fillStyle = current.tool === "eraser" ? "rgba(0,0,0,1)" : current.color;
-    ctx.beginPath();
-    const r = (current.size * (current.tool === "eraser" ? 3 : 1)) / 2;
-    ctx.arc(e.clientX, e.clientY, Math.max(0.5, r), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    holdAnchor = { x: e.clientX, y: e.clientY, time: Date.now() };
+    clearTimeout(holdTimer);
+    if (tool === "pen") {
+      holdTimer = setTimeout(triggerOverlayQuickShape, 440);
+    }
+    drawLive(e.clientX, e.clientY);
   });
 
   canvas.addEventListener("pointermove", (e) => {
-    if (!drawing) return;
-    const { x, y } = pos(e);
-    current.points.push({ x, y });
-    drawLive(x, y);
+    if (!drawing || !current) return;
+
+    if (current.isSnapped || isShape(current.tool)) {
+      current.x2 = e.clientX;
+      current.y2 = e.clientY;
+      current.shift = e.shiftKey;
+      if (current.shift && (current.tool === "line" || current.tool === "arrow")) {
+        const dx = current.x2 - current.x1;
+        const dy = current.y2 - current.y1;
+        const ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+        const len = Math.hypot(dx, dy);
+        current.x2 = current.x1 + Math.cos(ang) * len;
+        current.y2 = current.y1 + Math.sin(ang) * len;
+      }
+      redraw();
+      return;
+    }
+
+    if (holdAnchor) {
+      if (Math.hypot(e.clientX - holdAnchor.x, e.clientY - holdAnchor.y) > 9) {
+        holdAnchor = { x: e.clientX, y: e.clientY, time: Date.now() };
+        clearTimeout(holdTimer);
+        if (current.tool === "pen") {
+          holdTimer = setTimeout(triggerOverlayQuickShape, 440);
+        }
+      }
+    }
+
+    current.points.push({ x: e.clientX, y: e.clientY });
+    drawLive(e.clientX, e.clientY);
   });
 
-  const endStroke = (e) => {
+  const endStroke = () => {
+    clearTimeout(holdTimer);
+    holdAnchor = null;
     if (!drawing) return;
     drawing = false;
-    try {
-      canvas.releasePointerCapture(e.pointerId);
-    } catch {}
-    strokes.push(current);
+    if (!current) return;
+
+    if (isShape(current.tool)) {
+      if (Math.hypot(current.x2 - current.x1, current.y2 - current.y1) < 4) {
+        current = null;
+        redraw();
+        return;
+      }
+      strokes.push(current);
+      current = null;
+      last = null;
+      redraw();
+      return;
+    }
+
+    if (current.points && current.points.length) {
+      if (typeof LapDrawIntelligence !== "undefined") {
+        current.points = LapDrawIntelligence.stripFishhook(current.points);
+      }
+      if (smartAssist && current.tool === "pen" && typeof LapDrawIntelligence !== "undefined") {
+        const rec = LapDrawIntelligence.recognizeShape(current.points);
+        if (rec) {
+          current = {
+            tool: rec.type,
+            color: current.color,
+            size: current.size,
+            x1: rec.x1,
+            y1: rec.y1,
+            x2: rec.x2,
+            y2: rec.y2
+          };
+          toast(`✦ Snapped to ${rec.type.toUpperCase()}`);
+          strokes.push(current);
+          current = null;
+          last = null;
+          redraw();
+          return;
+        }
+      }
+      if (typeof LapDrawIntelligence !== "undefined" && current.points.length > 3) {
+        current.points = LapDrawIntelligence.smoothPoints(current.points, 0.25);
+      }
+      strokes.push(current);
+    }
+
     current = null;
     last = null;
+    redraw();
   };
 
   canvas.addEventListener("pointerup", endStroke);
   canvas.addEventListener("pointercancel", endStroke);
-
-  // In drawing mode the user intends to draw, not scroll the page
   canvas.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
   canvas.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -164,7 +385,7 @@
   canvas.addEventListener("pointerleave", endStroke);
 
   function drawLive(x, y) {
-    if (!current) return;
+    if (!current || !current.points) return;
     const isEraser = current.tool === "eraser";
     ctx.save();
     ctx.globalCompositeOperation = isEraser ? "destination-out" : "source-over";
@@ -191,10 +412,10 @@
     last = { x, y, midx: midX, midy: (last.y + y) / 2 };
   }
 
-  // ----- Toolbar & keyboard -----
-  async function savePng() {
+  // ----- Screenshot & Export Helpers -----
+  async function compositeDrawingOnPage() {
     const res = await chrome.runtime.sendMessage({ type: "lapdraw:capture" });
-    if (!res || res.error || !res.dataUrl) return;
+    if (!res || res.error || !res.dataUrl) return null;
     const img = new Image();
     await new Promise((ok, bad) => {
       img.onload = ok;
@@ -207,46 +428,53 @@
     const octx = out.getContext("2d");
     octx.drawImage(img, 0, 0, out.width, out.height);
     octx.setTransform(dpr(), 0, 0, dpr(), 0, 0);
-    strokes.forEach((s) => {
-      strokesEachOnCtx(s, octx);
-    });
+    for (const s of strokes) renderStrokeOn(s, octx);
+    return out;
+  }
+
+  async function savePng() {
+    toast("Saving PNG screenshot…");
+    const out = await compositeDrawingOnPage();
+    if (!out) return;
     const a = document.createElement("a");
     a.href = out.toDataURL("image/png");
     a.download = `lapdraw-${location.hostname.replace(/^www\./, "")}-${Date.now()}.png`;
     a.click();
+    toast("Saved PNG");
   }
 
-  function strokesEachOnCtx(stroke, c) {
-    const isEraser = stroke.tool === "eraser";
-    c.save();
-    c.globalCompositeOperation = isEraser ? "destination-out" : "source-over";
-    c.strokeStyle = isEraser ? "rgba(0,0,0,1)" : stroke.color;
-    c.lineWidth = stroke.size * (isEraser ? 3 : 1);
-    c.lineCap = "round";
-    c.lineJoin = "round";
-    c.beginPath();
-    const pts = stroke.points;
-    c.moveTo(pts[0].x, pts[0].y);
-    if (pts.length === 1) c.lineTo(pts[0].x + 0.01, pts[0].y + 0.01);
-    for (let i = 1; i < pts.length; i++) {
-      const midX = (pts[i - 1].x + pts[i].x) / 2;
-      const midY = (pts[i - 1].y + pts[i].y) / 2;
-      c.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, midX, midY);
-      if (i === pts.length - 1) c.lineTo(pts[i].x, pts[i].y);
-    }
-    c.stroke();
-    c.restore();
+  async function copyPngToClipboard() {
+    toast("Capturing screenshot…");
+    const out = await compositeDrawingOnPage();
+    if (!out) return;
+    out.toBlob(async (blob) => {
+      if (!blob) return;
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        toast("Copied screenshot + annotations to clipboard");
+      } catch {
+        toast("Clipboard blocked by browser");
+      }
+    }, "image/png");
   }
-
-  let redoStack = [];
 
   function onAction(act) {
     switch (act) {
       case "pen":
       case "eraser":
+      case "line":
+      case "rect":
+      case "arrow":
+      case "text":
         settings.tool = act;
         chrome.storage.local.set({ "lapdraw:settings": settings });
         syncControls();
+        break;
+      case "smart":
+        smartAssist = !smartAssist;
+        chrome.storage.local.set({ [PREFS_KEY]: { smartAssist } });
+        syncControls();
+        toast(smartAssist ? "Smart Shape Assist ON" : "Smart Assist OFF");
         break;
       case "undo": {
         const s = strokes.pop();
@@ -272,6 +500,9 @@
       case "save":
         savePng();
         break;
+      case "copy":
+        copyPngToClipboard();
+        break;
       case "off":
         setEnabled(false);
         break;
@@ -279,29 +510,36 @@
   }
 
   toolbar.addEventListener("click", (e) => {
-    const btn = e.target.closest('[data-act]');
+    const btn = e.target.closest("[data-act]");
     if (btn) onAction(btn.dataset.act);
   });
 
   colorEl.addEventListener("input", () => {
     settings.color = colorEl.value;
     chrome.storage.local.set({ "lapdraw:settings": settings });
+    syncControls();
   });
 
   sizeEl.addEventListener("input", () => {
     settings.size = Number(sizeEl.value);
     chrome.storage.local.set({ "lapdraw:settings": settings });
+    syncControls();
   });
 
-  // Capture phase + preventDefault so page scripts don't fight LapDraw keys.
-  // Bindings are remappable from the options page ("lapdraw:keymap".overlay).
+  // Capture phase keys remappable via options
   const DEFAULT_OVERLAY_KEYS = {
     pen: "p",
     eraser: "e",
+    line: "l",
+    rect: "r",
+    arrow: "a",
+    text: "t",
+    smart: "m",
     undo: "u,z,ctrl+z",
     redo: "r,ctrl+shift+z,ctrl+y",
     clear: "x",
     save: "s,ctrl+s",
+    copy: "c",
     sizedown: "[",
     sizeup: "]",
     exit: "escape"
@@ -341,11 +579,17 @@
 
   const OVERLAY_ACTIONS = {
     pen: () => onAction("pen"),
-    eraser: () => onAction(settings.tool === "eraser" ? "pen" : "eraser"),
+    eraser: () => onAction("eraser"),
+    line: () => onAction("line"),
+    rect: () => onAction("rect"),
+    arrow: () => onAction("arrow"),
+    text: () => onAction("text"),
+    smart: () => onAction("smart"),
     undo: () => onAction("undo"),
     redo: () => onAction("redo"),
     clear: () => onAction("clear"),
     save: () => onAction("save"),
+    copy: () => onAction("copy"),
     sizedown: () => {
       sizeEl.value = String(Math.max(1, settings.size - 1));
       sizeEl.dispatchEvent(new Event("input"));
@@ -373,75 +617,51 @@
     true
   );
 
-  window.addEventListener("resize", resizeCanvas);
-
-  // ----- Messages from popup/background -----
+  // Runtime messaging
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-    switch (msg && msg.type) {
+    switch (msg.type) {
       case "lapdraw:toggle":
-        toggle();
+        setEnabled(!enabled);
+        sendResponse({ enabled });
         break;
       case "lapdraw:enable":
         setEnabled(true);
+        sendResponse({ enabled: true });
         break;
       case "lapdraw:disable":
         setEnabled(false);
+        sendResponse({ enabled: false });
         break;
       case "lapdraw:get-state":
-        sendResponse({
-          enabled,
-          color: settings.color,
-          size: settings.size,
-          tool: settings.tool
-        });
-        return true;
-      case "lapdraw:tool":
-        settings.tool = msg.tool;
+        sendResponse({ enabled, ...settings, smartAssist });
+        break;
+      case "lapdraw:set-settings":
+        settings = { ...settings, ...msg.settings };
         syncControls();
-        return false;
-      case "lapdraw:color":
-        settings.color = msg.color;
-        syncControls();
-        return false;
-      case "lapdraw:size":
-        settings.size = msg.size;
-        sizeEl.value = String(msg.size);
-        return false;
-      case "lapdraw:undo":
-        onAction("undo");
-        return false;
-      case "lapdraw:redo":
-        onAction("redo");
-        return false;
-      case "lapdraw:toggle-eraser":
-        onAction(settings.tool === "eraser" ? "pen" : "eraser");
-        return false;
-      case "lapdraw:clear":
-        onAction("clear");
-        return false;
-      case "lapdraw:save":
-        onAction("save");
-        return false;
+        sendResponse({ ok: true });
+        break;
+      case "lapdraw:action":
+        onAction(msg.action);
+        sendResponse({ ok: true });
+        break;
     }
-    return false;
+    return true;
   });
 
-  // Keep toolbar in sync when popup changes shared settings
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== "local" || !changes["lapdraw:settings"]) return;
-    settings = { ...settings, ...changes["lapdraw:settings"].newValue };
-    syncControls();
+  window.addEventListener("resize", () => {
+    if (enabled) resizeCanvas();
   });
 
-  // Restore persisted settings on load
-  chrome.storage.local.get("lapdraw:settings", (store) => {
+  // Load preferences
+  chrome.storage.local.get(["lapdraw:settings", PREFS_KEY], (store) => {
     if (store["lapdraw:settings"]) {
       settings = { ...settings, ...store["lapdraw:settings"] };
     }
-    if (enabled) {
-      document.documentElement.classList.add("lapdraw-on");
-      resizeCanvas();
-      syncControls();
+    if (store[PREFS_KEY] && typeof store[PREFS_KEY].smartAssist === "boolean") {
+      smartAssist = store[PREFS_KEY].smartAssist;
     }
+    syncControls();
   });
+
+  if (enabled) setEnabled(true);
 })();
