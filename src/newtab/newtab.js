@@ -15,7 +15,7 @@ const STORE = "lapdraw:canvas";
 
 let view = { x: 0, y: 0, z: 1 }; // world -> screen: s = w * z + (x, y)
 let settings = { color: "#ff5c5c", size: 4, tool: "pen" };
-let strokes = []; // {tool, color, size, points:[{x,y}]}
+let strokes = []; // freehand: {tool:"pen"|"eraser", color, size, points:[{x,y}]} — shapes: {tool:"line"|"rect"|"ellipse", ..., x1,y1,x2,y2}
 let redoStack = [];
 let current = null;
 let last = null;
@@ -51,14 +51,33 @@ function redraw() {
 }
 
 function paint(stroke) {
-  const isEraser = stroke.tool === "eraser";
   ctx.save();
-  // "screen eraser": paint the background back over the stroke
   ctx.globalCompositeOperation = "source-over";
-  ctx.strokeStyle = isEraser ? BG : stroke.color;
-  ctx.lineWidth = Math.max(0.5, stroke.size * (isEraser ? 3 : 1) * view.z);
+  ctx.strokeStyle = stroke.tool === "eraser" ? BG : stroke.color;
+  const width = Math.max(0.5, stroke.size * (stroke.tool === "eraser" ? 3 : 1) * view.z);
+  ctx.lineWidth = width;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
+
+  if (isShape(stroke.tool)) {
+    const x1 = w2sX(stroke.x1);
+    const y1 = w2sY(stroke.y1);
+    const x2 = w2sX(stroke.x2);
+    const y2 = w2sY(stroke.y2);
+    ctx.beginPath();
+    if (stroke.tool === "line") {
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+    } else if (stroke.tool === "rect") {
+      ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+    } else if (stroke.tool === "ellipse") {
+      ctx.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1) / 2, Math.abs(y2 - y1) / 2, 0, 0, Math.PI * 2);
+    }
+    if (stroke.tool === "line") ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
   ctx.beginPath();
   const pts = stroke.points;
   ctx.moveTo(w2sX(pts[0].x), w2sY(pts[0].y));
@@ -72,6 +91,8 @@ function paint(stroke) {
   ctx.stroke();
   ctx.restore();
 }
+
+const isShape = (tool) => tool === "line" || tool === "rect" || tool === "ellipse";
 
 function persist() {
   chrome.storage.local.set({ [STORE]: { strokes, view } });
@@ -132,21 +153,52 @@ function startPan(e) {
 
 canvas.addEventListener("pointerdown", (e) => {
   canvas.setPointerCapture(e.pointerId);
-  if (e.button === 2 || e.button === 1 || e.shiftKey || (spaceHeld && e.button === 0)) {
+  if (e.button === 2 || e.button === 1 || (spaceHeld && e.button === 0)) {
     startPan(e);
     return;
   }
   if (e.button !== 0) return;
   redoStack = [];
-  current = {
-    tool: settings.tool,
-    color: settings.color,
-    size: Number(sizeEl.value),
-    points: [{ x: s2wX(e.clientX), y: s2wY(e.clientY) }]
-  };
+  const tool = settings.tool;
+  current = isShape(tool)
+    ? {
+        tool,
+        color: settings.color,
+        size: Number(sizeEl.value),
+        x1: s2wX(e.clientX),
+        y1: s2wY(e.clientY),
+        x2: s2wX(e.clientX),
+        y2: s2wY(e.clientY),
+        shift: e.shiftKey
+      }
+    : {
+        tool,
+        color: settings.color,
+        size: Number(sizeEl.value),
+        points: [{ x: s2wX(e.clientX), y: s2wY(e.clientY) }]
+      };
   last = null;
   paintLive(e.clientX, e.clientY);
 });
+
+function constrainShape(s) {
+  // Shift = snap: 45° diagonals for lines, square/circle for rect/ellipse
+  if (!s.shift) return;
+  if (s.tool === "line") {
+    const dx = s.x2 - s.x1;
+    const dy = s.y2 - s.y1;
+    const ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+    const len = Math.hypot(dx, dy);
+    s.x2 = s.x1 + Math.cos(ang) * len;
+    s.y2 = s.y1 + Math.sin(ang) * len;
+    return;
+  }
+  const w = Math.abs(s.x2 - s.x1);
+  const h = Math.abs(s.y2 - s.y1);
+  const size = Math.max(w, h);
+  s.x2 = s.x1 + Math.sign(s.x2 - s.x1 || 1) * size;
+  s.y2 = s.y1 + Math.sign(s.y2 - s.y1 || 1) * size;
+}
 
 canvas.addEventListener("pointermove", (e) => {
   if (panning) {
@@ -156,6 +208,13 @@ canvas.addEventListener("pointermove", (e) => {
     return;
   }
   if (!current) return;
+  if (isShape(current.tool)) {
+    current.x2 = s2wX(e.clientX);
+    current.y2 = s2wY(e.clientY);
+    constrainShape(current);
+    redraw(); // whole redraw keeps shape preview clean
+    return;
+  }
   current.points.push({ x: s2wX(e.clientX), y: s2wY(e.clientY) });
   paintLive(e.clientX, e.clientY);
 });
@@ -168,9 +227,18 @@ const endPointer = (e) => {
     return;
   }
   if (!current) return;
+  if (isShape(current.tool)) {
+    // ignore taps smaller than a dot
+    if (Math.hypot(current.x2 - current.x1, current.y2 - current.y1) < 2 / view.z) {
+      current = null;
+      redraw();
+      return;
+    }
+  }
   strokes.push(current);
   current = null;
   last = null;
+  redraw();
   persist();
 };
 
@@ -287,11 +355,18 @@ function fitContent() {
     return;
   }
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for (const s of strokes)
-    for (const p of s.points) {
-      minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
-      maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y);
+  const expand = (x, y) => {
+    minX = Math.min(minX, x); minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+  };
+  for (const s of strokes) {
+    if (isShape(s.tool)) {
+      expand(Math.min(s.x1, s.x2), Math.min(s.y1, s.y2));
+      expand(Math.max(s.x1, s.x2), Math.max(s.y1, s.y2));
+    } else {
+      for (const p of s.points) expand(p.x, p.y);
     }
+  }
   const pad = 60;
   const W = Math.max(100, window.innerWidth - pad * 2);
   const H = Math.max(100, window.innerHeight - pad * 2);
@@ -326,6 +401,12 @@ window.addEventListener("keydown", (e) => {
       settings.tool = "pen"; syncTools(); break;
     case "e":
       settings.tool = "eraser"; syncTools(); break;
+    case "l":
+      settings.tool = "line"; syncTools(); break;
+    case "r":
+      settings.tool = "rect"; syncTools(); break;
+    case "o":
+      settings.tool = "ellipse"; syncTools(); break;
     case "[":
       sizeEl.value = String(Math.max(1, Number(sizeEl.value) - 2));
       sizeEl.dispatchEvent(new Event("input")); break;
