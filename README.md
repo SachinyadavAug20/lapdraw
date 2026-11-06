@@ -48,8 +48,13 @@ It ships as a **zero-dependency**, local WebExtension (MV3 for Chrome, MV2 for F
 - 🧠 **QuickShape Intelligence** — hold still for 450ms at the end of a stroke to snap lines, boxes, circles, and arrows
 - 🧯 **Trackpad Streamline Stabilizer** — exponential moving-average filter removes friction stutter
 - 🎣 **Fishhook Trimmer** — removes directional hook artifacts when lifting your finger
-- 📐 **Diagram Tools** — Freehand Pen, Eraser, Straight Line, Box, Ellipse, Connector Arrow, and Monospace Text
-- 📦 **Developer Export Suite** — Copy SVG markup, Copy React component (`.tsx`), Copy Markdown embed, PNG, JPG, PDF, `.lapboard` project JSON
+- 📐 **Diagram Tools** — Freehand Pen, Eraser, Straight Line, Box, Ellipse, Decision Diamond, Storage Cylinder, Connector Arrow, Monospace Text, and Dashed Lines
+- 🗄 **Developer Diagram Intelligence (D)**:
+  - **Database Schemas & ER Diagrams**: Auto-generate database entity cards with columns and primary keys.
+  - **Sequence Diagrams**: Generate multi-actor lifelines with request/reply message flows and labels.
+  - **UML Class Diagrams**: Structured class cards with typed attributes and method compartments.
+  - **Architecture & Flowchart Nodes**: Microservices, Decision Diamonds, and Storage Cylinders.
+- 📦 **Developer Export Suite** — Copy SVG markup, Copy React component (`.tsx`), Copy Mermaid.js code (`mermaid`), Copy Markdown embed, PNG, JPG, PDF, `.lapboard` project JSON
 - ⌨️ **Configurable Shortcuts** — remap every key in the options page
 - 🌓 **Omarchy Rice** — dark terminal aesthetic, JetBrains Mono font, vim-flavored statusbar, zero emoji tofu
 
@@ -66,8 +71,8 @@ Drawing with a finger on a flat trackpad differs fundamentally from using a styl
 ### 2. Wobbly Geometric Shapes & Lines
 - **The Problem**: Drawing a clean straight line or a square box freehand on a trackpad is nearly impossible without a physical straightedge.
 - **LapDraw's Solution**:
-  - **QuickShape (Hold-to-Snap)**: Draw any line, rectangle, ellipse, or arrow and pause holding your finger still for 450ms. It instantly snaps into a clean vector shape! Dragging your finger adjusts the orientation and scale before releasing.
-  - **Smart Assist (Auto-Beautify)**: When `SMART` mode is active, finishing a stroke automatically tests for linearity, circularity, and rectangularity, converting rough sketches into crisp vector shapes.
+  - **QuickShape (Hold-to-Snap)**: Draw any line, rectangle, ellipse, diamond, cylinder, or arrow and pause holding your finger still for 450ms. It instantly snaps into a clean vector shape! Dragging your finger adjusts the orientation and scale before releasing.
+  - **Smart Assist (Auto-Beautify)**: When `SMART` mode is active, finishing a stroke automatically tests for linearity, circularity, rectangularity, diamonds, and cylinders, converting rough sketches into crisp vector shapes.
 
 ### 3. End-of-Stroke Finger Lift Fishhooks
 - **The Problem**: When lifting a finger from a trackpad, the finger decelerates and rolls slightly, creating a sharp 2–6px hook artifact at the end of every stroke.
@@ -82,12 +87,14 @@ Drawing with a finger on a flat trackpad differs fundamentally from using a styl
 - **LapDraw's Solution**: Native two-finger scroll panning, pinch-to-zoom, Spacebar+drag panning, and `FIT` (`0`) to center all artwork instantly.
 
 ### 6. Developer Diagramming Needs
-- **The Problem**: Developers need to sketch architecture diagrams, flowcharts, explain UI components, mark up live sites, and export directly into code or documentation.
+- **The Problem**: Developers need to sketch architecture diagrams, database schemas, sequence flows, and explain system designs, then export directly into code or documentation.
 - **LapDraw's Solution**:
-  - Connector arrow tool (`ARR`) with directional arrowheads
+  - In-app **Diagram Builder (`D`)** for Database Schemas, Sequence Diagrams, UML Classes, and Architecture Nodes
+  - Connector arrow tool (`ARR`) and dashed line mode (`DASH` / `K`)
+  - Decision diamonds and storage cylinder primitives
   - In-place monospace text tool (`TXT`) for labeling services and endpoints
-  - Grid snap (`SNAP`) to align boxes and connectors to a 16px grid
-  - One-click **Copy SVG code** and **Copy React component (.tsx)** to paste straight into IDEs.
+  - Grid snap (`SNAP` / `G`) to align boxes and connectors to a 16px grid
+  - One-click **Copy SVG code**, **Copy React component (.tsx)**, and **Copy Mermaid.js code** to paste straight into IDEs, Markdown, or GitHub PRs.
 
 ---
 
@@ -137,6 +144,8 @@ Every key below can be remapped in LapDraw's **Options Page** (click LapDraw ico
 | `OVL` | `O` | Ellipse / circle tool (hold Shift for circle) |
 | `ARR` | `A` | Connector arrow with filled arrowhead |
 | `TXT` | `T` | Monospace text label tool (click to type) |
+| `DIAG` | `D` | Open Developer Diagram Builder (DB Schema, Sequence, UML, Arch) |
+| `DASH` | `K` | Toggle Dashed connector / stroke mode |
 | `SMART` | `M` | Toggle Smart Shape Assist on / off |
 | `SNAP` | `G` | Toggle Grid Snap (16px grid alignment) |
 | Size | `[` / `]` | Shrink / grow stroke width |
