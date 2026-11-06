@@ -446,3 +446,158 @@ body {
 .tut-replay:hover {
   border-color: var(--accent);
 }
+
+/* Developer diagram button highlight */
+.chip.dev-chip {
+  border-color: rgba(100, 168, 255, 0.4);
+  color: #64a8ff;
+  font-weight: 600;
+}
+.chip.dev-chip:hover {
+  border-color: #64a8ff;
+  background: rgba(100, 168, 255, 0.15);
+}
+
+/* Developer Diagram Builder Modal */
+.diag-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(8, 10, 13, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.diag-modal.hidden {
+  display: none;
+}
+
+.diag-box {
+  width: min(540px, 94vw);
+  background: rgba(14, 17, 20, 0.98);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.diag-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.diag-head h3 {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+
+.diag-tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.diag-tab {
+  flex: 1;
+  padding: 9px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font: 11px/1 var(--font);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.diag-tab:hover {
+  color: var(--text);
+}
+
+.diag-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(255, 92, 80, 0.08);
+}
+
+.diag-pane {
+  display: none;
+  padding: 16px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diag-pane.active {
+  display: flex;
+}
+
+.diag-lbl {
+  font-size: 10.5px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.diag-input,
+.diag-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  background: #090c0f;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font: 12px/1.5 var(--font);
+  outline: none;
+}
+
+.diag-input:focus,
+.diag-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.preset-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.preset-row .lbl {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.preset-btn {
+  padding: 2px 7px;
+  font-size: 10px;
+}
+
+.diag-primary {
+  margin-top: 10px;
+  padding: 9px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  background: var(--accent);
+  color: #0e1114;
+  font: 600 12px/1 var(--font);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.diag-primary:hover {
+  background: transparent;
+  color: var(--accent);
+}

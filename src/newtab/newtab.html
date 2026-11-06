@@ -17,6 +17,7 @@
         <button class="chip tl" data-tool="ellipse" title="Ellipse / Circle (O)">OVL</button>
         <button class="chip tl" data-tool="arrow" title="Connector arrow (A)">ARR</button>
         <button class="chip tl" data-tool="text" title="Text label (T)">TXT</button>
+        <button class="chip tl dev-chip" id="openDiagModal" title="Diagram Builder — DB Tables, Sequence Diagrams, UML (D)">DIAG</button>
         <div class="sep"></div>
         <div class="palette" title="Developer Palette">
           <button class="dot" data-color="#ff5c50" style="--c:#ff5c50" title="Coral"></button>
@@ -33,6 +34,7 @@
         <div class="sep"></div>
         <button class="chip tl" id="toggleSmart" title="Smart Shape Assist (M) — auto-straightens lines, boxes & circles">SMART</button>
         <button class="chip tl" id="toggleSnap" title="Grid Snap (G) — snap coordinates to 16px grid">SNAP</button>
+        <button class="chip tl" id="toggleDash" title="Dashed Line Style (K) — for lifelines, async calls & interfaces">DASH</button>
         <div class="sep"></div>
         <button class="chip icon" id="undo" title="Undo (Ctrl+Z)">↩</button>
         <button class="chip icon" id="redo" title="Redo (Ctrl+Shift+Z)">↪</button>
@@ -43,7 +45,7 @@
         <button class="chip icon" id="zen" title="Toggle toolbar (Tab)">−</button>
         <button class="chip icon" id="help" title="Cheat sheet + tutorial (?)">?</button>
       </div>
-      <p class="help">click-drag draws · hold still 450ms = QuickShape · two-finger scroll pans · pinch zooms · <b>Shift</b>=snap</p>
+      <p class="help">click-drag draws · hold 450ms = QuickShape · <b>DIAG</b> = DB tables, UML & Sequence diagrams · <b>Shift</b>=snap</p>
       <span id="zoom" class="zoom">100%</span>
     </div>
 
@@ -52,10 +54,90 @@
       <span id="sb-strokes">0 strokes · 0 pts</span>
       <span id="sb-smart" class="sb-tag on">✦ SMART: ON</span>
       <span id="sb-snap" class="sb-tag">SNAP: OFF</span>
+      <span id="sb-dash" class="sb-tag">LINE: SOLID</span>
       <span id="sb-saved">saved</span>
       <span class="sb-right">
         <span id="sb-tool">pen</span> · <span id="sb-size">4px</span> · <span id="sb-zoom">100%</span>
       </span>
+    </div>
+
+    <!-- Developer Diagram Builder Modal -->
+    <div id="diagModal" class="diag-modal hidden">
+      <div class="diag-box">
+        <div class="diag-head">
+          <h3>⚡ DEVELOPER DIAGRAM BUILDER</h3>
+          <button id="closeDiagModal" class="chip icon">✕</button>
+        </div>
+        <div class="diag-tabs">
+          <button class="diag-tab active" data-tab="db">🗄 DB Schema</button>
+          <button class="diag-tab" data-tab="seq">⚡ Sequence Diagram</button>
+          <button class="diag-tab" data-tab="uml">🏛 UML Class</button>
+          <button class="diag-tab" data-tab="node">☁ Arch Node</button>
+        </div>
+
+        <!-- Tab 1: Database Table / Schema -->
+        <div class="diag-pane active" id="pane-db">
+          <label class="diag-lbl">Table / Entity Name</label>
+          <input id="dbTableName" class="diag-input" type="text" value="users" placeholder="e.g. users, orders, payments" />
+          <div class="preset-row">
+            <span class="lbl">Presets:</span>
+            <button class="chip preset-btn" data-preset="users">users</button>
+            <button class="chip preset-btn" data-preset="orders">orders</button>
+            <button class="chip preset-btn" data-preset="products">products</button>
+            <button class="chip preset-btn" data-preset="sessions">sessions</button>
+          </div>
+          <label class="diag-lbl">Columns (one per line, e.g. "id: uuid [PK]")</label>
+          <textarea id="dbColumns" class="diag-textarea" rows="5">id: uuid [PK]
+email: varchar(255) [UNIQUE]
+password_hash: text
+role: varchar [DEFAULT 'member']
+created_at: timestamp</textarea>
+          <button id="insertDbTable" class="diag-primary">Insert DB Table Card</button>
+        </div>
+
+        <!-- Tab 2: Sequence Diagram -->
+        <div class="diag-pane" id="pane-seq">
+          <label class="diag-lbl">Lifeline Actors (comma separated)</label>
+          <input id="seqActors" class="diag-input" type="text" value="Client, Gateway, AuthService, Database" />
+          <label class="diag-lbl">Messages (one per line: "A -> B: text" or "B --> A: return")</label>
+          <textarea id="seqMessages" class="diag-textarea" rows="5">Client -> Gateway: POST /login {email, pass}
+Gateway -> AuthService: ValidateCredentials()
+AuthService -> Database: SELECT user WHERE email
+Database --> AuthService: user record
+AuthService --> Gateway: 200 OK (JWT token)
+Gateway --> Client: Set-Cookie: session_jwt</textarea>
+          <button id="insertSeqDiagram" class="diag-primary">Generate Sequence Diagram</button>
+        </div>
+
+        <!-- Tab 3: UML Class -->
+        <div class="diag-pane" id="pane-uml">
+          <label class="diag-lbl">Class Name</label>
+          <input id="umlClassName" class="diag-input" type="text" value="OrderService" />
+          <label class="diag-lbl">Attributes / Properties (one per line)</label>
+          <textarea id="umlAttributes" class="diag-textarea" rows="3">- db: DatabasePool
+- redis: CacheClient
+- stripeApiKey: string</textarea>
+          <label class="diag-lbl">Methods (one per line)</label>
+          <textarea id="umlMethods" class="diag-textarea" rows="3">+ checkout(cart: Cart): Promise&lt;Order&gt;
++ refund(orderId: string): Promise&lt;void&gt;
++ calculateTax(amount: number): number</textarea>
+          <button id="insertUmlClass" class="diag-primary">Insert UML Class Box</button>
+        </div>
+
+        <!-- Tab 4: Architecture Node -->
+        <div class="diag-pane" id="pane-node">
+          <label class="diag-lbl">Node Shape / Component</label>
+          <select id="archNodeType" class="diag-input">
+            <option value="cylinder">Database Storage (Postgres / MySQL / Redis)</option>
+            <option value="diamond">Decision Gateway / Router</option>
+            <option value="rect">Microservice / API Box</option>
+            <option value="ellipse">Event Queue / Kafka Topic</option>
+          </select>
+          <label class="diag-lbl">Node Title</label>
+          <input id="archNodeLabel" class="diag-input" type="text" value="auth-service:8080" />
+          <button id="insertArchNode" class="diag-primary">Insert Architecture Node</button>
+        </div>
+      </div>
     </div>
 
     <div id="exportMenu" class="exportmenu hidden">
@@ -68,6 +150,7 @@
       <button data-x="copy">Copy · PNG image to clipboard</button>
       <button data-x="copy-svg">Copy · SVG code <span class="dev">&lt;svg&gt;</span></button>
       <button data-x="copy-react">Copy · React component <span class="dev">.tsx</span></button>
+      <button data-x="copy-mermaid">Copy · Mermaid.js code <span class="dev">mermaid</span></button>
       <button data-x="copy-md">Copy · Markdown embed <span class="dev">![]()</span></button>
       <div class="xmsep"></div>
       <button data-x="project-save">Save .lapboard project</button>
@@ -78,13 +161,12 @@
       <h2>LapDraw Canvas — Developer Shortcuts</h2>
       <table>
         <tr><td>Draw</td><td>click-drag (trackpad / mouse / pen)</td></tr>
-        <tr><td>QuickShape</td><td>draw and hold still for 450ms at end to snap straight lines / boxes / circles / arrows</td></tr>
-        <tr><td>Pan</td><td>two-finger scroll · Space+drag · Shift+drag · middle-drag · arrow keys</td></tr>
-        <tr><td>Zoom</td><td>pinch or Ctrl+scroll · + / − · Ctrl+1 = 100% · 0 or Ctrl+0 = fit</td></tr>
+        <tr><td>QuickShape</td><td>draw & hold still 450ms: line, box, circle, diamond, cylinder, arrow</td></tr>
+        <tr><td>Diagram Builder</td><td>D: open DB Tables, Sequence Diagram & UML generator</td></tr>
         <tr><td>Tools</td><td>P pen · E eraser · L line · R rect · O ellipse · A arrow · T text</td></tr>
-        <tr><td>Toggles</td><td>M smart assist · G grid snap · Tab zen mode</td></tr>
-        <tr><td>Stroke size</td><td>[ shrink · ] grow</td></tr>
-        <tr><td>Undo / Redo</td><td>Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)</td></tr>
+        <tr><td>Toggles</td><td>M smart assist · G grid snap · K dashed lines · Tab zen mode</td></tr>
+        <tr><td>Pan & Zoom</td><td>two-finger scroll pans · pinch zooms · 0 fit · Ctrl+1 100%</td></tr>
+        <tr><td>History</td><td>Ctrl+Z undo · Ctrl+Shift+Z (or Ctrl+Y) redo</td></tr>
         <tr><td>Quick Save</td><td>S or Ctrl+S (PNG artwork)</td></tr>
         <tr><td>Clear canvas</td><td>Ctrl+Shift+X</td></tr>
         <tr><td>This cheat sheet</td><td>? or H · Esc closes</td></tr>

@@ -286,6 +286,95 @@
     };
   }
 
+  // Detect decision diamond (flowcharts / UML activity diagrams)
+  function detectDiamond(pts, bounds) {
+    if (pts.length < 8) return null;
+    if (bounds.w < 16 || bounds.h < 16) return null;
+    if (!isNearlyClosed(pts, bounds)) return null;
+
+    const cx = (bounds.minX + bounds.maxX) / 2;
+    const cy = (bounds.minY + bounds.maxY) / 2;
+    const threshold = Math.max(8, Math.min(bounds.w, bounds.h) * 0.22);
+
+    let topMid = false, rightMid = false, botMid = false, leftMid = false;
+    for (const p of pts) {
+      if (Math.hypot(p.x - cx, p.y - bounds.minY) < threshold) topMid = true;
+      if (Math.hypot(p.x - bounds.maxX, p.y - cy) < threshold) rightMid = true;
+      if (Math.hypot(p.x - cx, p.y - bounds.maxY) < threshold) botMid = true;
+      if (Math.hypot(p.x - bounds.minX, p.y - cy) < threshold) leftMid = true;
+    }
+    if (!topMid || !rightMid || !botMid || !leftMid) return null;
+
+    // In a diamond, diagonal points are pulled inwards towards the center (min radial dist ~ 0.71)
+    // In a circle, radial distance is ~ 1.0 everywhere.
+    const rx = bounds.w / 2;
+    const ry = bounds.h / 2;
+    let minDiag = 1;
+    for (const p of pts) {
+      const d = Math.hypot((p.x - cx) / rx, (p.y - cy) / ry);
+      if (d < minDiag) minDiag = d;
+    }
+    if (minDiag > 0.82) return null; // Too round; it is a circle, not a diamond
+
+    // Diamond must NOT touch the 4 bounding box corners
+    let cornerTouches = 0;
+    const cornerThreshold = Math.max(6, Math.min(bounds.w, bounds.h) * 0.12);
+    for (const p of pts) {
+      if (
+        Math.hypot(p.x - bounds.minX, p.y - bounds.minY) < cornerThreshold ||
+        Math.hypot(p.x - bounds.maxX, p.y - bounds.minY) < cornerThreshold ||
+        Math.hypot(p.x - bounds.minX, p.y - bounds.maxY) < cornerThreshold ||
+        Math.hypot(p.x - bounds.maxX, p.y - bounds.maxY) < cornerThreshold
+      ) {
+        cornerTouches++;
+      }
+    }
+    if (cornerTouches > 2) return null;
+
+    return {
+      type: "diamond",
+      x1: bounds.minX,
+      y1: bounds.minY,
+      x2: bounds.maxX,
+      y2: bounds.maxY
+    };
+  }
+
+  // Detect database cylinder (architecture / ER diagrams)
+  function detectCylinder(pts, bounds) {
+    if (pts.length < 12) return null;
+    if (bounds.w < 18 || bounds.h < 22) return null;
+    if (!isNearlyClosed(pts, bounds)) return null;
+
+    const midY1 = bounds.minY + bounds.h * 0.25;
+    const midY2 = bounds.minY + bounds.h * 0.75;
+    let leftSide = 0, rightSide = 0;
+    for (const p of pts) {
+      if (p.y >= midY1 && p.y <= midY2) {
+        if (Math.abs(p.x - bounds.minX) < bounds.w * 0.14) leftSide++;
+        if (Math.abs(p.x - bounds.maxX) < bounds.w * 0.14) rightSide++;
+      }
+    }
+    if (leftSide >= 2 && rightSide >= 2) {
+      const cx = (bounds.minX + bounds.maxX) / 2;
+      let topCap = false, botCap = false;
+      for (const p of pts) {
+        if (Math.hypot(p.x - cx, p.y - bounds.minY) < bounds.h * 0.25) topCap = true;
+        if (Math.hypot(p.x - cx, p.y - bounds.maxY) < bounds.h * 0.25) botCap = true;
+      }
+      if (topCap && botCap) {
+        return {
+          type: "cylinder",
+          x1: bounds.minX,
+          y1: bounds.minY,
+          x2: bounds.maxX,
+          y2: bounds.maxY
+        };
+      }
+    }
+    return null;
+  }
+
   // Master recognizer: returns recognized shape or null
   function recognizeShape(rawPoints) {
     if (!rawPoints || rawPoints.length < 3) return null;
@@ -303,12 +392,21 @@
     // Check Closed Shapes
     const bounds = getBounds(pts);
     if (isNearlyClosed(pts, bounds)) {
-      // Circle has very strict low radial variance
+      // 1. Check Diamond (decision in flowcharts / UML)
+      const diamond = detectDiamond(pts, bounds);
+      if (diamond) return diamond;
+
+      // 2. Check Circle / Ellipse (strict low radial variance < 0.010)
       const circle = detectCircleOrEllipse(pts, bounds);
       if (circle) return circle;
 
+      // 3. Check Box / Rectangle (sharp 4 corners)
       const box = detectBox(pts, bounds);
       if (box) return box;
+
+      // 4. Check Database Cylinder (flat vertical sides + curved ends)
+      const cylinder = detectCylinder(pts, bounds);
+      if (cylinder) return cylinder;
     }
 
     return null;
