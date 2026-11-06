@@ -293,69 +293,81 @@
     chrome.storage.local.set({ "lapdraw:settings": settings });
   });
 
-  // Capture phase + preventDefault so page scripts don't fight LapDraw keys
+  // Capture phase + preventDefault so page scripts don't fight LapDraw keys.
+  // Bindings are remappable from the options page ("lapdraw:keymap".overlay).
+  const DEFAULT_OVERLAY_KEYS = {
+    pen: "p",
+    eraser: "e",
+    undo: "u,z,ctrl+z",
+    redo: "r,ctrl+shift+z,ctrl+y",
+    clear: "x",
+    save: "s,ctrl+s",
+    sizedown: "[",
+    sizeup: "]",
+    exit: "escape"
+  };
+  let overlayBindings = {};
+
+  function rebuildOverlayBindings() {
+    const base = {};
+    for (const [action, combos] of Object.entries(DEFAULT_OVERLAY_KEYS)) {
+      for (const c of combos.split(",")) base[c.trim()] = action;
+    }
+    const apply = (user) => {
+      overlayBindings = base;
+      if (user) {
+        overlayBindings = { ...base };
+        for (const combo of Object.keys(user)) overlayBindings[combo] = user[combo];
+      }
+    };
+    chrome.storage.local.get("lapdraw:keymap", (store) =>
+      apply(store["lapdraw:keymap"] && store["lapdraw:keymap"].overlay)
+    );
+  }
+  rebuildOverlayBindings();
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes["lapdraw:keymap"]) rebuildOverlayBindings();
+  });
+
+  const overlayCombo = (e) => {
+    const parts = [];
+    if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+    if (e.altKey) parts.push("alt");
+    if (e.shiftKey) parts.push("shift");
+    parts.push(e.key === " " ? "space" : e.key.toLowerCase());
+    return parts.join("+");
+  };
+
+  const OVERLAY_ACTIONS = {
+    pen: () => onAction("pen"),
+    eraser: () => onAction(settings.tool === "eraser" ? "pen" : "eraser"),
+    undo: () => onAction("undo"),
+    redo: () => onAction("redo"),
+    clear: () => onAction("clear"),
+    save: () => onAction("save"),
+    sizedown: () => {
+      sizeEl.value = String(Math.max(1, settings.size - 1));
+      sizeEl.dispatchEvent(new Event("input"));
+    },
+    sizeup: () => {
+      sizeEl.value = String(Math.min(30, settings.size + 1));
+      sizeEl.dispatchEvent(new Event("input"));
+    },
+    exit: () => setEnabled(false)
+  };
+
   window.addEventListener(
     "keydown",
     (e) => {
       if (!enabled) return;
       const t = e.target;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
-      const mod = e.ctrlKey || e.metaKey;
-      const key = e.key.toLowerCase();
-
-      const eat = () => {
+      const action = overlayBindings[overlayCombo(e)];
+      if (action && OVERLAY_ACTIONS[action]) {
         e.preventDefault();
         e.stopPropagation();
-      };
-
-      if (mod && key === "z" && !e.shiftKey) return onAction("undo"), eat();
-      if ((mod && key === "z" && e.shiftKey) || (mod && key === "y")) return onAction("redo"), eat();
-      if (mod && key === "s") return onAction("save"), eat();
-
-      switch (e.key) {
-        case "Escape":
-          setEnabled(false);
-          eat();
-          break;
-        case "u":
-          onAction("undo");
-          eat();
-          break;
-        case "z":
-          onAction("undo");
-          eat();
-          break;
-        case "r":
-          onAction("redo");
-          eat();
-          break;
-        case "x":
-          onAction("clear");
-          eat();
-          break;
-        case "e":
-          settings.tool = settings.tool === "eraser" ? "pen" : "eraser";
-          onAction(settings.tool);
-          eat();
-          break;
-        case "p":
-          onAction("pen");
-          eat();
-          break;
-        case "s":
-          onAction("save");
-          eat();
-          break;
-        case "[":
-          sizeEl.value = String(Math.max(1, settings.size - 1));
-          sizeEl.dispatchEvent(new Event("input"));
-          eat();
-          break;
-        case "]":
-          sizeEl.value = String(Math.min(30, settings.size + 1));
-          sizeEl.dispatchEvent(new Event("input"));
-          eat();
-          break;
+        OVERLAY_ACTIONS[action]();
       }
     },
     true

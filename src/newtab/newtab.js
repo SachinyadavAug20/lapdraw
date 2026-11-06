@@ -385,68 +385,117 @@ function fitContent() {
   persist();
 }
 
-// ----- Keyboard -----
+// ----- Keyboard (registry-driven, remappable via the options page) -----
+const CANVAS_ACTIONS = {
+  pen: () => setTool("pen"),
+  eraser: () => setTool("eraser"),
+  line: () => setTool("line"),
+  rect: () => setTool("rect"),
+  ellipse: () => setTool("ellipse"),
+  sizeup: () => stepSize(+2),
+  sizedown: () => stepSize(-2),
+  zoomin: () => zoomAt(window.innerWidth / 2, window.innerHeight / 2, 1.15),
+  zoomout: () => zoomAt(window.innerWidth / 2, window.innerHeight / 2, 1 / 1.15),
+  fit: () => fitContent(),
+  resetzoom: () => (view = { x: 0, y: 0, z: 1 }, redraw()),
+  undo: () => undo(),
+  redo: () => redo(),
+  clear: () => clearAll(),
+  save: () => exportPngArtwork(),
+  zen: () => hud.classList.toggle("zen"),
+  help: () => cheatsheet.classList.toggle("hidden"),
+  cancel: () => {
+    cheatsheet.classList.add("hidden");
+    document.getElementById("exportMenu").classList.add("hidden");
+    if (current) {
+      current = null;
+      last = null;
+      redraw();
+    }
+  },
+  panup: () => (view.y += 60, redraw()),
+  pandown: () => (view.y -= 60, redraw()),
+  panleft: () => (view.x += 60, redraw()),
+  panright: () => (view.x -= 60, redraw())
+};
+
+function setTool(tool) {
+  settings.tool = tool;
+  syncTools();
+}
+
+function stepSize(d) {
+  sizeEl.value = String(Math.max(1, Math.min(40, Number(sizeEl.value) + d)));
+  sizeEl.dispatchEvent(new Event("input"));
+}
+
+const KEYMAP_STORE = "lapdraw:keymap";
+const DEFAULT_CANVAS_KEYS = {
+  pen: "p",
+  eraser: "e",
+  line: "l",
+  rect: "r",
+  ellipse: "o",
+  sizeup: "]",
+  sizedown: "[",
+  zoomin: "+",
+  zoomout: "-",
+  fit: "0",
+  resetzoom: "ctrl+1",
+  undo: "ctrl+z",
+  redo: "ctrl+shift+z,ctrl+y",
+  clear: "ctrl+shift+x",
+  save: "s,ctrl+s",
+  zen: "tab",
+  help: "?",
+  cancel: "escape",
+  panup: "arrowup",
+  pandown: "arrowdown",
+  panleft: "arrowleft",
+  panright: "arrowright"
+};
+
+let canvasBindings = {}; // normalized combo -> action id
+
+function comboOf(e) {
+  const parts = [];
+  if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+  if (e.altKey) parts.push("alt");
+  if (e.shiftKey) parts.push("shift");
+  parts.push(e.key === " " ? "space" : e.key.toLowerCase());
+  return parts.join("+");
+}
+
+function rebuildCanvasBindings() {
+  canvasBindings = {};
+  for (const [action, combos] of Object.entries(DEFAULT_CANVAS_KEYS)) {
+    for (const c of combos.split(",")) canvasBindings[c.trim()] = action;
+  }
+  chrome.storage.local.get(KEYMAP_STORE, (store) => {
+    const user = store[KEYMAP_STORE] && store[KEYMAP_STORE].canvas;
+    if (user) {
+      for (const combo of Object.keys(user)) canvasBindings[combo] = user[combo];
+    }
+  });
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes[KEYMAP_STORE]) rebuildCanvasBindings();
+});
+
 window.addEventListener("keydown", (e) => {
   const t = e.target;
-  const typing = t && (t.tagName === "INPUT" && t.type !== "color" && t.type !== "range" && t.type !== "checkbox" || t.tagName === "TEXTAREA");
-  if (e.key === " " && !typing) {
+  const isTextField = t && ((t.tagName === "INPUT" && !["color", "range", "checkbox"].includes(t.type)) || t.tagName === "TEXTAREA");
+  if (e.key === " " && !isTextField) {
     spaceHeld = true;
     e.preventDefault();
     return;
   }
-  if (typing) return;
-  const mod = e.ctrlKey || e.metaKey;
-  const key = e.key.toLowerCase();
-
-  if (mod && key === "z" && !e.shiftKey) return undo(), e.preventDefault();
-  if ((mod && key === "z" && e.shiftKey) || (mod && key === "y")) return redo(), e.preventDefault();
-  if (mod && key === "s") return exportPngArtwork(), e.preventDefault();
-  if (mod && e.shiftKey && key === "x") return clearAll(), e.preventDefault();
-  if (mod && key === "1") return (view = { x: 0, y: 0, z: 1 }, redraw(), e.preventDefault());
-  if (mod && (key === "0" || key === "=")) return fitContent(), e.preventDefault();
-
-  switch (key) {
-    case "p":
-      settings.tool = "pen"; syncTools(); break;
-    case "e":
-      settings.tool = "eraser"; syncTools(); break;
-    case "l":
-      settings.tool = "line"; syncTools(); break;
-    case "r":
-      settings.tool = "rect"; syncTools(); break;
-    case "o":
-      settings.tool = "ellipse"; syncTools(); break;
-    case "[":
-      sizeEl.value = String(Math.max(1, Number(sizeEl.value) - 2));
-      sizeEl.dispatchEvent(new Event("input")); break;
-    case "]":
-      sizeEl.value = String(Math.min(40, Number(sizeEl.value) + 2));
-      sizeEl.dispatchEvent(new Event("input")); break;
-    case "s":
-      exportPngArtwork(); break;
-    case "0":
-      fitContent(); break;
-    case "+":
-    case "=":
-      zoomAt(window.innerWidth / 2, window.innerHeight / 2, 1.15); break;
-    case "-":
-    case "_":
-      zoomAt(window.innerWidth / 2, window.innerHeight / 2, 1 / 1.15); break;
-    case "?":
-    case "h":
-      cheatsheet.classList.toggle("hidden"); break;
-    case "tab":
-      hud.classList.toggle("zen"); e.preventDefault(); break;
-    case "escape":
-      cheatsheet.classList.add("hidden");
-      if (current) {
-        current = null; last = null; redraw();
-      }
-      break;
-    case "arrowleft": view.x += 60; redraw(); break;
-    case "arrowright": view.x -= 60; redraw(); break;
-    case "arrowup": view.y += 60; redraw(); break;
-    case "arrowdown": view.y -= 60; redraw(); break;
+  if (isTextField) return;
+  const action = canvasBindings[comboOf(e)];
+  if (action && CANVAS_ACTIONS[action]) {
+    e.preventDefault();
+    CANVAS_ACTIONS[action]();
   }
 });
 

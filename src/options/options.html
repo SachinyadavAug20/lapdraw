@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LapDraw — Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <header>
+      <h1>⌨️ LAPDRAW</h1>
+      <p class="sub">remap every key · click a binding, then press the combo you want · Esc clears</p>
+    </header>
+
+    <section>
+      <h2>∞ Infinite Canvas</h2>
+      <div id="canvasRows" class="rows"></div>
+    </section>
+
+    <section>
+      <h2>✍️ On-Page Overlay</h2>
+      <div id="overlayRows" class="rows"></div>
+    </section>
+
+    <div class="actions">
+      <button id="reset">Reset all to defaults</button>
+      <span id="saved" class="saved"></span>
+    </div>
+
+    <p class="note">
+      Global browser shortcuts (Alt+Shift+D / E / Z / C) live at
+      <code>chrome://extensions/shortcuts</code> — browsers only allow remapping those there.
+    </p>
+
+    <script src="options.js"></script>
+  </body>
+</html>

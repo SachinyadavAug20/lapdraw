@@ -26,6 +26,10 @@
       "all_frames": false
     }
   ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
   "commands": {
     "toggle-draw": {
       "suggested_key": { "default": "Alt+Shift+D" },
