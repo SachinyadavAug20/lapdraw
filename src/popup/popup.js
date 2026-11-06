@@ -112,7 +112,7 @@ document.querySelectorAll("[data-act]").forEach((chip) =>
 );
 
 $("#openCanvas").addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "lapdraw:open-canvas" });
+  chrome.tabs.create({ url: chrome.runtime.getURL("newtab/newtab.html") });
   window.close();
 });
 

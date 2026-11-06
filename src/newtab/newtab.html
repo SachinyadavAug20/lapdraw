@@ -15,17 +15,37 @@
         <input id="color" type="color" value="#ff5c5c" title="Color" />
         <input id="size" type="range" min="1" max="40" value="4" title="Size ( [ / ] )" />
         <div class="sep"></div>
-        <button class="chip" id="undo" title="Undo (Ctrl+Z)">↩ Undo</button>
+        <button class="chip" id="undo" title="Undo (Ctrl+Z)">↩</button>
+        <button class="chip" id="redo" title="Redo (Ctrl+Shift+Z / Ctrl+Y)">↪</button>
         <button class="chip" id="clear" title="Clear canvas">Clear</button>
         <div class="sep"></div>
-        <button class="chip" id="save" title="Save PNG (S)">💾 Save</button>
-        <button class="chip" id="resetView" title="Reset view (0)">🎯 Fit</button>
+        <button class="chip" id="save" title="Save PNG (Ctrl+S)">💾 Save</button>
+        <button class="chip" id="fit" title="Fit all content (0)">🎯 Fit</button>
+        <button class="chip" id="zen" title="Toggle toolbar (Tab)">🫥</button>
+        <button class="chip" id="help" title="Shortcuts (?)">?</button>
       </div>
       <p class="help">
-        ✍️ draw with trackpad click-drag · 🖐 two-finger scroll to pan · pinch or Ctrl+scroll to zoom ·
-        everything auto-saves in this tab
+        ✍️ click-drag draws · 🖐 two-finger scroll pans · pinch / Ctrl+scroll zooms ·
+        Space+drag pans · auto-saves
       </p>
       <span id="zoom" class="zoom">100%</span>
+    </div>
+
+    <div id="cheatsheet" class="cheatsheet hidden">
+      <h2>LapDraw Canvas — Shortcuts</h2>
+      <table>
+        <tr><td>Draw</td><td>click-drag (trackpad / mouse / pen)</td></tr>
+        <tr><td>Pan</td><td>two-finger scroll · Space+drag · Shift+drag · middle-drag · arrow keys</td></tr>
+        <tr><td>Zoom</td><td>pinch or Ctrl+scroll · + / − · Ctrl+1 = 100% · 0 or Ctrl+0 = fit</td></tr>
+        <tr><td>Pen / Eraser</td><td>P / E</td></tr>
+        <tr><td>Stroke size</td><td>[ / ]</td></tr>
+        <tr><td>Undo / Redo</td><td>Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)</td></tr>
+        <tr><td>Save PNG</td><td>S or Ctrl+S</td></tr>
+        <tr><td>Clear canvas</td><td>Ctrl+Shift+X</td></tr>
+        <tr><td>Hide toolbar</td><td>Tab (press again to bring back)</td></tr>
+        <tr><td>This cheat sheet</td><td>? or H</td></tr>
+      </table>
+      <p class="tip">Everything auto-saves in this tab. Fit (0) centers all your content.</p>
     </div>
 
     <script src="newtab.js"></script>

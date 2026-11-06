@@ -20,7 +20,8 @@
     <input class="lapdraw-color" type="color" value="#ff5c5c" title="Color" />
     <input class="lapdraw-size" type="range" min="1" max="30" step="1" value="4" title="Stroke size" />
     <div class="lapdraw-sep"></div>
-    <button class="lapdraw-btn" data-act="undo" title="Undo (U)">↩ Undo</button>
+    <button class="lapdraw-btn" data-act="undo" title="Undo (U / Ctrl+Z)">↩</button>
+    <button class="lapdraw-btn" data-act="redo" title="Redo (R / Ctrl+Shift+Z)">↪</button>
     <button class="lapdraw-btn" data-act="clear" title="Clear (X)">Clear</button>
     <button class="lapdraw-btn" data-act="save" title="Save PNG (S)">💾 Save</button>
     <div class="lapdraw-sep"></div>
@@ -115,6 +116,7 @@
     e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
     drawing = true;
+    redoStack = [];
     current = {
       tool: settings.tool,
       color: settings.color,
@@ -236,6 +238,8 @@
     c.restore();
   }
 
+  let redoStack = [];
+
   function onAction(act) {
     switch (act) {
       case "pen":
@@ -244,11 +248,24 @@
         chrome.storage.local.set({ "lapdraw:settings": settings });
         syncControls();
         break;
-      case "undo":
-        strokes.pop();
-        redraw();
+      case "undo": {
+        const s = strokes.pop();
+        if (s) {
+          redoStack.push(s);
+          redraw();
+        }
         break;
+      }
+      case "redo": {
+        const s = redoStack.pop();
+        if (s) {
+          strokes.push(s);
+          redraw();
+        }
+        break;
+      }
       case "clear":
+        redoStack.push(...strokes.reverse());
         strokes = [];
         redraw();
         break;
@@ -276,45 +293,73 @@
     chrome.storage.local.set({ "lapdraw:settings": settings });
   });
 
-  window.addEventListener("keydown", (e) => {
-    if (!enabled) return;
-    const t = e.target;
-    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
-    switch (e.key) {
-      case "Escape":
-        setEnabled(false);
-        break;
-      case "u":
-      case "z":
-        onAction("undo");
+  // Capture phase + preventDefault so page scripts don't fight LapDraw keys
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      if (!enabled) return;
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+      const mod = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+
+      const eat = () => {
         e.preventDefault();
-        break;
-      case "x":
-        onAction("clear");
-        e.preventDefault();
-        break;
-      case "s":
-        onAction("save");
-        e.preventDefault();
-        break;
-      case "e":
-        onAction("eraser");
-        e.preventDefault();
-        break;
-      case "p":
-        onAction("pen");
-        e.preventDefault();
-        break;
-      case "[":
-        sizeEl.value = String(Math.max(1, settings.size - 1));
-        sizeEl.dispatchEvent(new Event("input"));
-        break;
-      case "]":
-        sizeEl.value = String(Math.min(30, settings.size + 1));
-        sizeEl.dispatchEvent(new Event("input"));
-        break;
-    }
-  });
+        e.stopPropagation();
+      };
+
+      if (mod && key === "z" && !e.shiftKey) return onAction("undo"), eat();
+      if ((mod && key === "z" && e.shiftKey) || (mod && key === "y")) return onAction("redo"), eat();
+      if (mod && key === "s") return onAction("save"), eat();
+
+      switch (e.key) {
+        case "Escape":
+          setEnabled(false);
+          eat();
+          break;
+        case "u":
+          onAction("undo");
+          eat();
+          break;
+        case "z":
+          onAction("undo");
+          eat();
+          break;
+        case "r":
+          onAction("redo");
+          eat();
+          break;
+        case "x":
+          onAction("clear");
+          eat();
+          break;
+        case "e":
+          settings.tool = settings.tool === "eraser" ? "pen" : "eraser";
+          onAction(settings.tool);
+          eat();
+          break;
+        case "p":
+          onAction("pen");
+          eat();
+          break;
+        case "s":
+          onAction("save");
+          eat();
+          break;
+        case "[":
+          sizeEl.value = String(Math.max(1, settings.size - 1));
+          sizeEl.dispatchEvent(new Event("input"));
+          eat();
+          break;
+        case "]":
+          sizeEl.value = String(Math.min(30, settings.size + 1));
+          sizeEl.dispatchEvent(new Event("input"));
+          eat();
+          break;
+      }
+    },
+    true
+  );
 
   window.addEventListener("resize", resizeCanvas);
 
@@ -352,6 +397,12 @@
         return false;
       case "lapdraw:undo":
         onAction("undo");
+        return false;
+      case "lapdraw:redo":
+        onAction("redo");
+        return false;
+      case "lapdraw:toggle-eraser":
+        onAction(settings.tool === "eraser" ? "pen" : "eraser");
         return false;
       case "lapdraw:clear":
         onAction("clear");

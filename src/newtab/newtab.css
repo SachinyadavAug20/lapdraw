@@ -104,3 +104,63 @@ body {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
 }
+
+/* zen mode: shrink toolbar to a dot, keep a place to click back */
+.hud.zen .bar,
+.hud.zen .help {
+  visibility: hidden;
+}
+
+.hud.zen {
+  background: rgba(18, 18, 22, 0.6);
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  transform: translateX(50%);
+  left: 100%;
+  bottom: 4px;
+  cursor: pointer;
+}
+
+.cheatsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: auto;
+  background: rgba(10, 11, 14, 0.92);
+  padding: 40px clamp(20px, 12vw, 160px);
+}
+
+.cheatsheet.hidden {
+  display: none;
+}
+
+.cheatsheet h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.cheatsheet table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 640px;
+}
+
+.cheatsheet td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #26272e;
+  font-size: 13px;
+  color: #cfcfd6;
+}
+
+.cheatsheet td:first-child {
+  color: #8fb6ff;
+  white-space: nowrap;
+  width: 180px;
+}
+
+.cheatsheet .tip {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #8a8a94;
+}

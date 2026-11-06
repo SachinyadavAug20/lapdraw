@@ -28,12 +28,45 @@ npm run build
 | Input | Action |
 | --- | --- |
 | Click-drag (trackpad/mouse/pen) | Draw |
-| Right-click in draw mode | Turn LapDraw off |
-| Toolbars | Pen / Eraser / Color / Size / Undo / Clear / Save PNG |
+| Two-finger scroll | Pan (canvas page) |
+| Pinch or Ctrl+scroll | Zoom (canvas page) |
+| Toolbars | Pen / Eraser / Color / Size / Undo / Redo / Clear / Save PNG |
 
-On-page shortcuts: `Alt+Shift+D` toggle · `Esc` exit · `P` pen · `E` eraser · `U`/`Z` undo · `X` clear · `S` save · `[` `]` trim stroke size.
+### Global shortcuts (change them at chrome://extensions/shortcuts)
 
-Infinite canvas: two-finger scroll pans, pinch or `Ctrl+scroll` zooms, `0` resets view, `S` saves PNG. Drawings auto-save per machine via `chrome.storage.local`.
+| Keys | Action |
+| --- | --- |
+| `Alt+Shift+D` | Toggle drawing on the current page |
+| `Alt+Shift+E` | Switch pen ↔ eraser |
+| `Alt+Shift+Z` | Undo the last stroke |
+| `Alt+Shift+C` | Open the infinite canvas |
+
+### While drawing on a page
+
+| Keys | Action |
+| --- | --- |
+| `Esc` | Exit drawing mode (right-click also works) |
+| `P` / `E` | Pen / eraser |
+| `U` / `Z` | Undo — `R`, `Ctrl+Z`, `Ctrl+Y` redo |
+| `X` | Clear all strokes |
+| `S` / `Ctrl+S` | Save page + drawing as PNG |
+| `[` / `]` | Shrink / grow stroke |
+
+### Infinite canvas
+
+| Keys | Action |
+| --- | --- |
+| Space+drag, Shift+drag, middle-drag | Pan |
+| Two-finger scroll / arrow keys | Pan |
+| Pinch or Ctrl+scroll, `+` / `−` | Zoom |
+| `0` or `Ctrl+0` | Fit all content |
+| `Ctrl+1` | Reset zoom to 100% |
+| `P` / `E` | Pen / eraser |
+| `[` / `]` | Stroke size |
+| `Ctrl+Z` / `Ctrl+Shift+Z` / `Ctrl+Y` | Undo / redo |
+| `S` / `Ctrl+S` | Save PNG |
+| `Tab` | Hide/show toolbar (zen mode) |
+| `?` or `H` | In-app cheat sheet |
 
 ## Architecture
 

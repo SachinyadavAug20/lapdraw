@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return true;
     }
     case "lapdraw:open-canvas": {
-      chrome.tabs.create({ url: chrome.runtime.getURL("newtab/newtab.html") });
+      openCanvas();
       sendResponse({ ok: true });
       return false;
     }
@@ -35,14 +35,42 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Keyboard shortcut (Alt+Shift+D by default) to toggle drawing mode
-chrome.commands.onCommand.addListener(async (command) => {
-  if (command !== "toggle-draw") return;
+function openCanvas() {
+  chrome.tabs.create({ url: chrome.runtime.getURL("newtab/newtab.html") });
+}
+
+async function activeTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return tab;
+}
+
+async function sendToActive(message, fallback) {
+  const tab = await activeTab();
   if (!tab) return;
   try {
-    await chrome.tabs.sendMessage(tab.id, { type: "lapdraw:toggle" });
+    await chrome.tabs.sendMessage(tab.id, message);
   } catch {
-    // Content script not present (e.g. chrome:// pages) — nothing to toggle
+    // Content script not present (e.g. chrome:// pages)
+    if (fallback) fallback();
+  }
+}
+
+// Keyboard shortcuts (editable at chrome://extensions/shortcuts)
+//   Alt+Shift+D  toggle drawing   Alt+Shift+E  pen <-> eraser
+//   Alt+Shift+Z  undo stroke      Alt+Shift+C  open infinite canvas
+chrome.commands.onCommand.addListener((command) => {
+  switch (command) {
+    case "toggle-draw":
+      sendToActive({ type: "lapdraw:toggle" });
+      break;
+    case "toggle-eraser":
+      sendToActive({ type: "lapdraw:toggle-eraser" });
+      break;
+    case "undo-stroke":
+      sendToActive({ type: "lapdraw:undo" });
+      break;
+    case "open-canvas":
+      openCanvas();
+      break;
   }
 });
