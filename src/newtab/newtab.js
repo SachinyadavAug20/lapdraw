@@ -119,6 +119,7 @@ function syncTools() {
 
 // ----- History -----
 function undo() {
+  window.tutDone && window.tutDone("undo");
   const s = strokes.pop();
   if (s) {
     redoStack.push(s);
@@ -204,6 +205,7 @@ canvas.addEventListener("pointermove", (e) => {
   if (panning) {
     view.x = panning.vx + (e.clientX - panning.x);
     view.y = panning.vy + (e.clientY - panning.y);
+    window.tutDone && window.tutDone("pan");
     redraw();
     return;
   }
@@ -227,6 +229,7 @@ const endPointer = (e) => {
     return;
   }
   if (!current) return;
+  window.tutDone && window.tutDone("draw");
   if (isShape(current.tool)) {
     // ignore taps smaller than a dot
     if (Math.hypot(current.x2 - current.x1, current.y2 - current.y1) < 2 / view.z) {
@@ -270,6 +273,7 @@ canvas.addEventListener(
 );
 
 function zoomAt(cx, cy, factor) {
+  window.tutDone && window.tutDone("zoom");
   const nz = Math.min(10, Math.max(0.05, view.z * factor));
   const k = nz / view.z;
   view.x = cx - (cx - view.x) * k;
@@ -342,7 +346,10 @@ document.querySelectorAll("[data-x]").forEach((b) =>
       "project-save": exportProject,
       "project-open": importProject
     }[b.dataset.x];
-    if (act) act();
+    if (act) {
+      act();
+      window.tutDone && window.tutDone("export");
+    }
   })
 );
 
@@ -355,6 +362,11 @@ window.addEventListener("pointerdown", (e) => {
 });
 document.getElementById("zen").addEventListener("click", () => hud.classList.toggle("zen"));
 document.getElementById("help").addEventListener("click", () => cheatsheet.classList.toggle("hidden"));
+document.getElementById("fit").addEventListener("click", () => fitContent());
+document.getElementById("replayTutorial").addEventListener("click", () => {
+  cheatsheet.classList.add("hidden");
+  window.lapdrawTutorial && window.lapdrawTutorial.start();
+});
 
 function fitContent() {
   if (!strokes.length) {
@@ -422,6 +434,7 @@ const CANVAS_ACTIONS = {
 function setTool(tool) {
   settings.tool = tool;
   syncTools();
+  if (tool !== "pen") window.tutDone && window.tutDone("tools");
 }
 
 function stepSize(d) {
