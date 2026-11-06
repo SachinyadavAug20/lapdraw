@@ -69,6 +69,10 @@
   }
 
   function syncControls() {
+    if (activeOverlayEditor && settings.tool !== "text") {
+      commitOverlayText();
+    }
+    if (canvas) canvas.style.cursor = settings.tool === "text" ? "text" : "crosshair";
     colorEl.value = settings.color;
     sizeEl.value = String(settings.size);
     toolbar.querySelectorAll("[data-act]").forEach((b) => {
@@ -99,10 +103,53 @@
     c.lineJoin = "round";
 
     if (stroke.tool === "text") {
-      const fs = Math.max(12, stroke.size * 3);
-      c.font = `${fs}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+      const rawFs = stroke.fontSize || Math.max(12, stroke.size * 3);
+      const sx = stroke.x;
+      const sy = stroke.y;
+      const lines = (stroke.text || "").split("\n");
+      const lh = rawFs * 1.4;
+
+      c.font = `${rawFs}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+      c.textBaseline = "top";
+
+      let maxW = 0;
+      for (const line of lines) {
+        const w = c.measureText(line).width;
+        if (w > maxW) maxW = w;
+      }
+      const padX = stroke.card ? 10 : 0;
+      const padY = stroke.card ? 8 : 0;
+      const badgeH = stroke.badge ? 18 : 0;
+      const totalW = maxW + padX * 2;
+      const totalH = lines.length * lh + padY * 2 + badgeH;
+
+      if (stroke.card) {
+        c.fillStyle = "rgba(14, 18, 24, 0.94)";
+        c.fillRect(sx, sy, totalW, totalH);
+        c.strokeStyle = stroke.color;
+        c.lineWidth = 1.5;
+        c.strokeRect(sx, sy, totalW, totalH);
+        c.fillStyle = stroke.color;
+        c.fillRect(sx, sy, totalW, 2);
+      }
+
+      let startTextY = sy + padY;
+      if (stroke.badge) {
+        const bText = `[${stroke.badge.toUpperCase()}]`;
+        c.font = `600 10px "JetBrains Mono", monospace`;
+        const bw = c.measureText(bText).width + 8;
+        c.fillStyle = stroke.color;
+        c.fillRect(sx + padX, sy + padY, bw, 15);
+        c.fillStyle = "#0e1114";
+        c.fillText(bText, sx + padX + 4, sy + padY + 2);
+        startTextY += 18;
+      }
+
+      c.font = `${rawFs}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
       c.fillStyle = isEraser ? "rgba(0,0,0,1)" : stroke.color;
-      c.fillText(stroke.text || "", stroke.x, stroke.y);
+      for (let i = 0; i < lines.length; i++) {
+        c.fillText(lines[i], sx + padX, startTextY + i * lh);
+      }
       c.restore();
       return;
     }
@@ -175,51 +222,251 @@
     }
   }
 
-  // Text input for overlay
-  function spawnOverlayTextInput(x, y) {
-    if (activeTextInput) activeTextInput.remove();
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "lapdraw-text-input";
-    input.placeholder = "type note… (Enter to save)";
-    input.style.left = `${x}px`;
-    input.style.top = `${y - 12}px`;
-    input.style.color = settings.color;
-    root.appendChild(input);
-    input.focus();
-    activeTextInput = input;
+  // Rich text editor for overlay
+  let activeOverlayEditor = null;
 
-    const commit = () => {
-      const txt = input.value.trim();
-      if (txt) {
-        strokes.push({
-          tool: "text",
-          color: settings.color,
-          size: settings.size,
-          x,
-          y,
-          text: txt
-        });
-        redraw();
-        toast("Added note");
+  function hitTestOverlayText(x, y) {
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const s = strokes[i];
+      if (s.tool !== "text") continue;
+      const fs = s.fontSize || Math.max(12, s.size * 3);
+      const lines = (s.text || "").split("\n");
+      const maxLen = Math.max(1, ...lines.map((l) => l.length));
+      const padX = s.card ? 10 : 0;
+      const padY = s.card ? 8 : 0;
+      const badgeH = s.badge ? 18 : 0;
+      const w = maxLen * fs * 0.65 + padX * 2;
+      const h = lines.length * fs * 1.4 + padY * 2 + badgeH;
+      if (x >= s.x - 4 && x <= s.x + w + 8 && y >= s.y - 4 && y <= s.y + h + 8) {
+        return { stroke: s, index: i };
       }
-      input.remove();
-      activeTextInput = null;
+    }
+    return null;
+  }
+
+  function commitOverlayText() {
+    if (!activeOverlayEditor) return;
+    const { el, x, y, getData } = activeOverlayEditor;
+    const data = getData();
+    const trimmed = data.text.trim();
+    if (trimmed) {
+      strokes.push({
+        tool: "text",
+        color: data.color,
+        fontSize: data.fontSize,
+        size: Math.max(1, Math.round(data.fontSize / 3)),
+        card: data.card,
+        badge: data.badge || null,
+        x,
+        y,
+        text: data.text
+      });
+      redraw();
+      toast(data.card ? "Saved code note" : "Saved note");
+    }
+    el.remove();
+    activeOverlayEditor = null;
+  }
+
+  function cancelOverlayText(restoreStroke = null) {
+    if (!activeOverlayEditor) return;
+    const { el } = activeOverlayEditor;
+    if (restoreStroke) {
+      strokes.push(restoreStroke);
+      redraw();
+    }
+    el.remove();
+    activeOverlayEditor = null;
+  }
+
+  function handleOverlayTextClick(e) {
+    if (activeOverlayEditor) commitOverlayText();
+
+    const hit = hitTestOverlayText(e.clientX, e.clientY);
+    if (hit) {
+      const oldStroke = strokes.splice(hit.index, 1)[0];
+      redraw();
+      spawnOverlayTextEditor(oldStroke.x, oldStroke.y, oldStroke);
+      return;
+    }
+
+    spawnOverlayTextEditor(e.clientX, e.clientY, null);
+  }
+
+  function spawnOverlayTextEditor(x, y, initialData = null) {
+    if (activeOverlayEditor) commitOverlayText();
+
+    const container = document.createElement("div");
+    container.className = "lapdraw-text-editor";
+
+    container.addEventListener("pointerdown", (e) => e.stopPropagation());
+    container.addEventListener("mousedown", (e) => e.stopPropagation());
+    container.addEventListener("click", (e) => e.stopPropagation());
+
+    const editorW = 300;
+    const editorH = 160;
+    const left = Math.min(window.innerWidth - editorW - 16, Math.max(16, x - 8));
+    const top = Math.min(window.innerHeight - editorH - 16, Math.max(16, y - 24));
+    container.style.left = `${left}px`;
+    container.style.top = `${top}px`;
+
+    let curFontSize = initialData?.fontSize || (settings.size <= 2 ? 14 : settings.size <= 4 ? 18 : 24);
+    let isCard = initialData ? !!initialData.card : false;
+    let curBadge = initialData?.badge || "";
+    let curColor = initialData?.color || settings.color;
+
+    // 1. Toolbar
+    const toolbar = document.createElement("div");
+    toolbar.className = "lapdraw-text-toolbar";
+
+    const sizeGroup = document.createElement("div");
+    sizeGroup.className = "lapdraw-text-group";
+    const SIZES = [
+      { label: "SM", val: 12 },
+      { label: "MD", val: 16 },
+      { label: "LG", val: 22 }
+    ];
+    const sizeBtns = SIZES.map(({ label, val }) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "lapdraw-text-chip" + (Math.abs(curFontSize - val) <= 2 ? " active" : "");
+      b.textContent = label;
+      b.onclick = () => {
+        curFontSize = val;
+        sizeBtns.forEach((btn) => btn.classList.remove("active"));
+        b.classList.add("active");
+        area.style.fontSize = `${Math.min(18, Math.max(11, val))}px`;
+      };
+      sizeGroup.appendChild(b);
+      return b;
+    });
+
+    const cardBtn = document.createElement("button");
+    cardBtn.type = "button";
+    cardBtn.className = "lapdraw-text-chip" + (isCard ? " active" : "");
+    cardBtn.textContent = "{ CODE }";
+    cardBtn.onclick = () => {
+      isCard = !isCard;
+      cardBtn.classList.toggle("active", isCard);
     };
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
+    const badgeSelect = document.createElement("select");
+    badgeSelect.className = "lapdraw-text-select";
+    const BADGES = ["TAG", "TODO", "BUG", "NOTE", "API"];
+    for (const bg of BADGES) {
+      const opt = document.createElement("option");
+      opt.value = bg === "TAG" ? "" : bg;
+      opt.textContent = bg;
+      if ((initialData?.badge || "").toUpperCase() === bg) opt.selected = true;
+      badgeSelect.appendChild(opt);
+    }
+    badgeSelect.onchange = () => {
+      curBadge = badgeSelect.value;
+    };
+
+    toolbar.appendChild(sizeGroup);
+    toolbar.appendChild(cardBtn);
+    toolbar.appendChild(badgeSelect);
+    container.appendChild(toolbar);
+
+    // 2. Textarea
+    const area = document.createElement("textarea");
+    area.className = "lapdraw-text-area";
+    area.placeholder = "type note or code…\nShift+Enter: newline\nTab: indent\nEnter: save";
+    area.value = initialData?.text || "";
+    area.style.fontSize = `${Math.min(18, Math.max(11, curFontSize))}px`;
+    area.style.color = curColor;
+
+    const autoGrow = () => {
+      area.style.height = "auto";
+      area.style.height = Math.max(54, Math.min(200, area.scrollHeight + 4)) + "px";
+    };
+    area.addEventListener("input", autoGrow);
+
+    area.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
         e.preventDefault();
-        commit();
+        const s = area.selectionStart;
+        const end = area.selectionEnd;
+        area.value = area.value.substring(0, s) + "  " + area.value.substring(end);
+        area.selectionStart = area.selectionEnd = s + 2;
+        autoGrow();
+      } else if (e.key === "Enter") {
+        if (e.ctrlKey || e.metaKey || (!e.shiftKey && !area.value.includes("\n"))) {
+          e.preventDefault();
+          commitOverlayText();
+        }
       } else if (e.key === "Escape") {
-        input.remove();
-        activeTextInput = null;
+        e.preventDefault();
+        cancelOverlayText(initialData);
       }
     });
 
-    input.addEventListener("blur", () => {
-      setTimeout(commit, 50);
-    });
+    container.appendChild(area);
+
+    // 3. Footer
+    const footer = document.createElement("div");
+    footer.className = "lapdraw-text-footer";
+
+    const hint = document.createElement("span");
+    hint.className = "lapdraw-text-hint";
+    hint.textContent = "↵ save · ⇧↵ line · ⇥ indent";
+    footer.appendChild(hint);
+
+    const actions = document.createElement("div");
+    actions.className = "lapdraw-text-actions";
+
+    if (initialData) {
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "lapdraw-text-btn del";
+      delBtn.textContent = "DEL";
+      delBtn.onclick = () => {
+        cancelOverlayText(null);
+        toast("Deleted note");
+      };
+      actions.appendChild(delBtn);
+    }
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.className = "lapdraw-text-btn";
+    cancelBtn.textContent = "ESC";
+    cancelBtn.onclick = () => cancelOverlayText(initialData);
+    actions.appendChild(cancelBtn);
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "lapdraw-text-btn save";
+    saveBtn.textContent = "SAVE";
+    saveBtn.onclick = () => commitOverlayText();
+    actions.appendChild(saveBtn);
+
+    footer.appendChild(actions);
+    container.appendChild(footer);
+
+    root.appendChild(container);
+    autoGrow();
+
+    setTimeout(() => {
+      area.focus();
+      if (initialData) {
+        area.setSelectionRange(area.value.length, area.value.length);
+      }
+    }, 10);
+
+    activeOverlayEditor = {
+      el: container,
+      x,
+      y,
+      getData: () => ({
+        text: area.value,
+        fontSize: curFontSize,
+        card: isCard,
+        badge: curBadge,
+        color: curColor
+      })
+    };
   }
 
   function triggerOverlayQuickShape() {
@@ -248,12 +495,13 @@
   // ----- Pointer Drawing Events -----
   canvas.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
-    canvas.setPointerCapture(e.pointerId);
 
     if (settings.tool === "text") {
-      spawnOverlayTextInput(e.clientX, e.clientY);
+      handleOverlayTextClick(e);
       return;
     }
+
+    canvas.setPointerCapture(e.pointerId);
 
     drawing = true;
     redoStack = [];
@@ -288,7 +536,13 @@
   });
 
   canvas.addEventListener("pointermove", (e) => {
-    if (!drawing || !current) return;
+    if (!drawing || !current) {
+      if (settings.tool === "text") {
+        const hit = hitTestOverlayText(e.clientX, e.clientY);
+        canvas.style.cursor = hit ? "pointer" : "text";
+      }
+      return;
+    }
 
     if (current.isSnapped || isShape(current.tool)) {
       current.x2 = e.clientX;

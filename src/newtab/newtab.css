@@ -180,18 +180,143 @@ body {
   color: var(--accent);
 }
 
-.canvas-text-input {
+.canvas-text-input,
+.canvas-text-editor {
   position: fixed;
-  background: rgba(14, 17, 20, 0.96);
+  background: rgba(14, 17, 20, 0.98);
   border: 1px solid var(--accent);
   color: var(--text);
-  font: 13px var(--font);
-  padding: 4px 8px;
+  border-radius: 6px;
+  z-index: 1000;
+  min-width: 290px;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 92, 80, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 6px;
+  font-family: var(--font);
+  animation: editorPop 0.12s ease-out;
+}
+
+@keyframes editorPop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.text-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.text-editor-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.text-editor-chip {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font: 10px var(--font);
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.text-editor-chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.text-editor-chip.active {
+  background: rgba(255, 92, 80, 0.18);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.text-editor-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font: 10px var(--font);
+  padding: 2px 4px;
   border-radius: 3px;
   outline: none;
-  z-index: 100;
-  min-width: 100px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+
+.text-editor-area {
+  background: #090b0e;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: 13px/1.45 var(--font);
+  padding: 6px 8px;
+  border-radius: 4px;
+  outline: none;
+  resize: vertical;
+  min-height: 56px;
+  max-height: 240px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.text-editor-area:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(255, 92, 80, 0.3);
+}
+
+.text-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.text-editor-hint {
+  font-size: 9.5px;
+  color: var(--text-dim);
+  letter-spacing: 0.2px;
+}
+
+.text-editor-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.text-editor-btn {
+  font: 10px var(--font);
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.text-editor-btn.save {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0e1114;
+  font-weight: 600;
+}
+
+.text-editor-btn.del {
+  border-color: #ff4757;
+  color: #ff6b81;
+}
+
+.text-editor-btn:hover {
+  filter: brightness(1.2);
 }
 
 .statusbar .saved-dirty {

@@ -86,12 +86,60 @@ function paint(stroke) {
     ctx.setLineDash([]);
   }
 
-  // 1. Text Tool
+  // 1. Text Tool / Developer Code Card
   if (stroke.tool === "text") {
-    const fontSize = Math.max(10, (stroke.size || 4) * 3 * view.z);
+    const rawFs = stroke.fontSize || Math.max(12, (stroke.size || 4) * 3);
+    const fontSize = Math.max(9, rawFs * view.z);
+    const sx = w2sX(stroke.x);
+    const sy = w2sY(stroke.y);
+    const lines = (stroke.text || "").split("\n");
+    const lh = fontSize * 1.4;
+
+    ctx.font = `${fontSize}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+    ctx.textBaseline = "top";
+
+    let maxW = 0;
+    for (const line of lines) {
+      const w = ctx.measureText(line).width;
+      if (w > maxW) maxW = w;
+    }
+    const padX = stroke.card ? 10 * view.z : 0;
+    const padY = stroke.card ? 8 * view.z : 0;
+    const badgeH = stroke.badge ? 18 * view.z : 0;
+    const totalW = maxW + padX * 2;
+    const totalH = lines.length * lh + padY * 2 + badgeH;
+
+    if (stroke.card) {
+      // Draw dark terminal code card background
+      ctx.fillStyle = "rgba(14, 18, 24, 0.94)";
+      ctx.fillRect(sx, sy, totalW, totalH);
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = Math.max(1, 1.5 * view.z);
+      ctx.strokeRect(sx, sy, totalW, totalH);
+
+      // Colored top accent stripe
+      ctx.fillStyle = stroke.color;
+      ctx.fillRect(sx, sy, totalW, 2 * view.z);
+    }
+
+    let startTextY = sy + padY;
+    if (stroke.badge) {
+      const bFs = Math.max(8, 10 * view.z);
+      ctx.font = `600 ${bFs}px "JetBrains Mono", monospace`;
+      const bText = `[${stroke.badge.toUpperCase()}]`;
+      const bw = ctx.measureText(bText).width + 8 * view.z;
+      ctx.fillStyle = stroke.color;
+      ctx.fillRect(sx + padX, sy + padY, bw, 15 * view.z);
+      ctx.fillStyle = "#0e1114";
+      ctx.fillText(bText, sx + padX + 4 * view.z, sy + padY + 2 * view.z);
+      startTextY += 18 * view.z;
+    }
+
     ctx.font = `${fontSize}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
     ctx.fillStyle = stroke.tool === "eraser" ? BG : stroke.color;
-    ctx.fillText(stroke.text || "", w2sX(stroke.x), w2sY(stroke.y));
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], sx + padX, startTextY + i * lh);
+    }
     ctx.restore();
     return;
   }
@@ -361,54 +409,273 @@ function startPan(e) {
   canvas.classList.add("panning");
 }
 
-function spawnTextInput(clientX, clientY) {
-  if (activeTextInput) activeTextInput.remove();
+let activeTextEditor = null;
 
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "canvas-text-input";
-  input.placeholder = "type text… (Enter to save)";
-  input.style.left = `${clientX}px`;
-  input.style.top = `${clientY - 12}px`;
-  input.style.color = settings.color;
-  document.body.appendChild(input);
-  input.focus();
-  activeTextInput = input;
-
-  const commit = () => {
-    const txt = input.value.trim();
-    if (txt) {
-      const wx = gridSnap ? LapDrawIntelligence.snapToGridCoord(s2wX(clientX)) : s2wX(clientX);
-      const wy = gridSnap ? LapDrawIntelligence.snapToGridCoord(s2wY(clientY)) : s2wY(clientY);
-      strokes.push({
-        tool: "text",
-        color: settings.color,
-        size: settings.size,
-        x: wx,
-        y: wy,
-        text: txt
-      });
-      redraw();
-      persist();
-      toast("Added text label");
+function hitTestText(wx, wy) {
+  for (let i = strokes.length - 1; i >= 0; i--) {
+    const s = strokes[i];
+    if (s.tool !== "text") continue;
+    const fs = s.fontSize || Math.max(12, (s.size || 4) * 3);
+    const lines = (s.text || "").split("\n");
+    const maxLen = Math.max(1, ...lines.map((l) => l.length));
+    const padX = s.card ? 10 : 0;
+    const padY = s.card ? 8 : 0;
+    const badgeH = s.badge ? 18 : 0;
+    const w = maxLen * fs * 0.65 + padX * 2;
+    const h = lines.length * fs * 1.4 + padY * 2 + badgeH;
+    if (wx >= s.x - 4 && wx <= s.x + w + 8 && wy >= s.y - 4 && wy <= s.y + h + 8) {
+      return { stroke: s, index: i };
     }
-    input.remove();
-    activeTextInput = null;
+  }
+  return null;
+}
+
+function commitActiveText() {
+  if (!activeTextEditor) return;
+  const { el, worldX, worldY, getData } = activeTextEditor;
+  const data = getData();
+  const trimmed = data.text.trim();
+  if (trimmed) {
+    strokes.push({
+      tool: "text",
+      color: data.color,
+      fontSize: data.fontSize,
+      size: Math.max(1, Math.round(data.fontSize / 3)),
+      card: data.card,
+      badge: data.badge || null,
+      x: worldX,
+      y: worldY,
+      text: data.text
+    });
+    redraw();
+    persist();
+    toast(data.card ? "Saved code card" : "Saved text note");
+  }
+  el.remove();
+  activeTextEditor = null;
+}
+
+function cancelActiveText(restoreStroke = null) {
+  if (!activeTextEditor) return;
+  const { el } = activeTextEditor;
+  if (restoreStroke) {
+    strokes.push(restoreStroke);
+    redraw();
+    persist();
+  }
+  el.remove();
+  activeTextEditor = null;
+}
+
+function handleTextClick(e) {
+  const wx = s2wX(e.clientX);
+  const wy = s2wY(e.clientY);
+
+  if (activeTextEditor) {
+    commitActiveText();
+  }
+
+  // Check if clicked an existing text stroke to edit it
+  const hit = hitTestText(wx, wy);
+  if (hit) {
+    const oldStroke = strokes.splice(hit.index, 1)[0];
+    redraw();
+    persist();
+    spawnTextEditor(e.clientX, e.clientY, oldStroke.x, oldStroke.y, oldStroke);
+    return;
+  }
+
+  const placeX = snapCoord(wx);
+  const placeY = snapCoord(wy);
+  spawnTextEditor(e.clientX, e.clientY, placeX, placeY, null);
+}
+
+function spawnTextEditor(screenX, screenY, worldX, worldY, initialData = null) {
+  if (activeTextEditor) commitActiveText();
+
+  const container = document.createElement("div");
+  container.className = "canvas-text-editor";
+
+  // Prevent clicks inside editor from propagating to canvas
+  container.addEventListener("pointerdown", (e) => e.stopPropagation());
+  container.addEventListener("mousedown", (e) => e.stopPropagation());
+  container.addEventListener("click", (e) => e.stopPropagation());
+
+  // Viewport clamping
+  const editorW = 320;
+  const editorH = 170;
+  const left = Math.min(window.innerWidth - editorW - 16, Math.max(16, screenX - 10));
+  const top = Math.min(window.innerHeight - editorH - 16, Math.max(16, screenY - 24));
+  container.style.left = `${left}px`;
+  container.style.top = `${top}px`;
+
+  // State
+  let curFontSize = initialData?.fontSize || (settings.size <= 2 ? 14 : settings.size <= 4 ? 18 : settings.size <= 8 ? 24 : 30);
+  let isCard = initialData ? !!initialData.card : false;
+  let curBadge = initialData?.badge || "";
+  let curColor = initialData?.color || settings.color;
+
+  // 1. Toolbar
+  const toolbar = document.createElement("div");
+  toolbar.className = "text-editor-toolbar";
+
+  // Size pills
+  const sizeGroup = document.createElement("div");
+  sizeGroup.className = "text-editor-group";
+  const SIZES = [
+    { label: "SM", val: 12 },
+    { label: "MD", val: 16 },
+    { label: "LG", val: 22 },
+    { label: "XL", val: 30 }
+  ];
+  const sizeBtns = SIZES.map(({ label, val }) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "text-editor-chip" + (Math.abs(curFontSize - val) <= 2 ? " active" : "");
+    b.textContent = label;
+    b.title = `${val}px font`;
+    b.onclick = () => {
+      curFontSize = val;
+      sizeBtns.forEach((btn) => btn.classList.remove("active"));
+      b.classList.add("active");
+      area.style.fontSize = `${Math.min(18, Math.max(11, val))}px`;
+    };
+    sizeGroup.appendChild(b);
+    return b;
+  });
+
+  // Code Card Toggle
+  const cardBtn = document.createElement("button");
+  cardBtn.type = "button";
+  cardBtn.className = "text-editor-chip" + (isCard ? " active" : "");
+  cardBtn.textContent = "{ CODE }";
+  cardBtn.title = "Format as dark terminal code card";
+  cardBtn.onclick = () => {
+    isCard = !isCard;
+    cardBtn.classList.toggle("active", isCard);
   };
 
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
+  // Badge Selector
+  const badgeSelect = document.createElement("select");
+  badgeSelect.className = "text-editor-select";
+  badgeSelect.title = "Developer callout tag";
+  const BADGES = ["TAG", "TODO", "FIXME", "NOTE", "API", "DB", "WARN", "BUG"];
+  for (const bg of BADGES) {
+    const opt = document.createElement("option");
+    opt.value = bg === "TAG" ? "" : bg;
+    opt.textContent = bg;
+    if ((initialData?.badge || "").toUpperCase() === bg) opt.selected = true;
+    badgeSelect.appendChild(opt);
+  }
+  badgeSelect.onchange = () => {
+    curBadge = badgeSelect.value;
+  };
+
+  toolbar.appendChild(sizeGroup);
+  toolbar.appendChild(cardBtn);
+  toolbar.appendChild(badgeSelect);
+  container.appendChild(toolbar);
+
+  // 2. Textarea
+  const area = document.createElement("textarea");
+  area.className = "text-editor-area";
+  area.placeholder = "Type note, code snippet, or markdown…\nShift+Enter: newline\nTab: indent\nEnter: save";
+  area.value = initialData?.text || "";
+  area.style.fontSize = `${Math.min(18, Math.max(11, curFontSize))}px`;
+  area.style.color = curColor;
+
+  const autoGrow = () => {
+    area.style.height = "auto";
+    area.style.height = Math.max(56, Math.min(220, area.scrollHeight + 4)) + "px";
+  };
+  area.addEventListener("input", autoGrow);
+
+  // Tab key indent & Enter commit
+  area.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
       e.preventDefault();
-      commit();
+      const s = area.selectionStart;
+      const end = area.selectionEnd;
+      area.value = area.value.substring(0, s) + "  " + area.value.substring(end);
+      area.selectionStart = area.selectionEnd = s + 2;
+      autoGrow();
+    } else if (e.key === "Enter") {
+      if (e.ctrlKey || e.metaKey || (!e.shiftKey && !area.value.includes("\n"))) {
+        e.preventDefault();
+        commitActiveText();
+      }
     } else if (e.key === "Escape") {
-      input.remove();
-      activeTextInput = null;
+      e.preventDefault();
+      cancelActiveText(initialData);
     }
   });
 
-  input.addEventListener("blur", () => {
-    setTimeout(commit, 50);
-  });
+  container.appendChild(area);
+
+  // 3. Footer
+  const footer = document.createElement("div");
+  footer.className = "text-editor-footer";
+
+  const hint = document.createElement("span");
+  hint.className = "text-editor-hint";
+  hint.textContent = "↵ save · ⇧↵ line · ⇥ indent";
+  footer.appendChild(hint);
+
+  const actions = document.createElement("div");
+  actions.className = "text-editor-actions";
+
+  if (initialData) {
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "text-editor-btn del";
+    delBtn.textContent = "DEL";
+    delBtn.title = "Delete this text block";
+    delBtn.onclick = () => {
+      cancelActiveText(null);
+      toast("Deleted text");
+    };
+    actions.appendChild(delBtn);
+  }
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.className = "text-editor-btn";
+  cancelBtn.textContent = "ESC";
+  cancelBtn.onclick = () => cancelActiveText(initialData);
+  actions.appendChild(cancelBtn);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "text-editor-btn save";
+  saveBtn.textContent = "SAVE";
+  saveBtn.onclick = () => commitActiveText();
+  actions.appendChild(saveBtn);
+
+  footer.appendChild(actions);
+  container.appendChild(footer);
+
+  document.body.appendChild(container);
+  autoGrow();
+
+  setTimeout(() => {
+    area.focus();
+    if (initialData) {
+      area.setSelectionRange(area.value.length, area.value.length);
+    }
+  }, 10);
+
+  activeTextEditor = {
+    el: container,
+    worldX,
+    worldY,
+    getData: () => ({
+      text: area.value,
+      fontSize: curFontSize,
+      card: isCard,
+      badge: curBadge,
+      color: curColor
+    })
+  };
 }
 
 function snapCoord(val) {
@@ -418,7 +685,6 @@ function snapCoord(val) {
 }
 
 canvas.addEventListener("pointerdown", (e) => {
-  canvas.setPointerCapture(e.pointerId);
   if (e.button === 2 || e.button === 1 || (spaceHeld && e.button === 0)) {
     startPan(e);
     return;
@@ -426,9 +692,11 @@ canvas.addEventListener("pointerdown", (e) => {
   if (e.button !== 0) return;
 
   if (settings.tool === "text") {
-    spawnTextInput(e.clientX, e.clientY);
+    handleTextClick(e);
     return;
   }
+
+  canvas.setPointerCapture(e.pointerId);
 
   redoStack = [];
   const tool = settings.tool;
@@ -520,7 +788,13 @@ canvas.addEventListener("pointermove", (e) => {
     redraw();
     return;
   }
-  if (!current) return;
+  if (!current) {
+    if (settings.tool === "text" && !panning) {
+      const hit = hitTestText(s2wX(e.clientX), s2wY(e.clientY));
+      canvas.style.cursor = hit ? "pointer" : "text";
+    }
+    return;
+  }
 
   const curWx = snapCoord(s2wX(e.clientX));
   const curWy = snapCoord(s2wY(e.clientY));
@@ -1052,8 +1326,16 @@ function fitContent() {
   };
   for (const s of strokes) {
     if (s.tool === "text") {
-      expand(s.x, s.y - 20);
-      expand(s.x + (s.text || "").length * 12, s.y + 10);
+      const fs = s.fontSize || Math.max(12, (s.size || 4) * 3);
+      const lines = (s.text || "").split("\n");
+      const maxLen = Math.max(1, ...lines.map((l) => l.length));
+      const padX = s.card ? 10 : 0;
+      const padY = s.card ? 8 : 0;
+      const badgeH = s.badge ? 18 : 0;
+      const w = maxLen * fs * 0.65 + padX * 2;
+      const h = lines.length * fs * 1.4 + padY * 2 + badgeH;
+      expand(s.x, s.y);
+      expand(s.x + w, s.y + h);
     } else if (s.tool === "table") {
       expand(s.x, s.y);
       expand(s.x + (s.w || 220), s.y + 28 + (s.rows?.length || 1) * 22);
@@ -1103,9 +1385,8 @@ const CANVAS_ACTIONS = {
     cheatsheet.classList.add("hidden");
     document.getElementById("exportMenu").classList.add("hidden");
     toggleDiagModal(false);
-    if (activeTextInput) {
-      activeTextInput.remove();
-      activeTextInput = null;
+    if (activeTextEditor) {
+      cancelActiveText();
     }
     if (current) {
       current = null;
@@ -1120,8 +1401,12 @@ const CANVAS_ACTIONS = {
 };
 
 function setTool(tool) {
+  if (activeTextEditor && tool !== "text") {
+    commitActiveText();
+  }
   settings.tool = tool;
   syncTools();
+  if (canvas) canvas.style.cursor = tool === "text" ? "text" : "crosshair";
   if (tool !== "pen") window.tutDone && window.tutDone("tools");
 }
 

@@ -15,10 +15,16 @@ function bounds() {
   for (const s of strokes) {
     const r = pad(s) / 2;
     if (s.tool === "text") {
-      const fs = (s.size || 4) * 3;
-      const tw = ((s.text || "").length + 1) * fs * 0.65;
-      grow(s.x, s.y - fs, r);
-      grow(s.x + tw, s.y + 6, r);
+      const fs = s.fontSize || Math.max(12, (s.size || 4) * 3);
+      const lines = (s.text || "").split("\n");
+      const maxLen = Math.max(1, ...lines.map((l) => l.length));
+      const padX = s.card ? 10 : 0;
+      const padY = s.card ? 8 : 0;
+      const badgeH = s.badge ? 18 : 0;
+      const tw = maxLen * fs * 0.65 + padX * 2;
+      const th = lines.length * fs * 1.4 + padY * 2 + badgeH;
+      grow(s.x, s.y, r);
+      grow(s.x + tw, s.y + th, r);
     } else if (s.tool === "table") {
       const sw = s.w || 220;
       const headerH = 28;
@@ -66,10 +72,55 @@ function renderArtwork(scale = 1) {
     }
 
     if (s.tool === "text") {
-      const fontSize = Math.max(10, (s.size || 4) * 3 * scale);
+      const rawFs = s.fontSize || Math.max(12, (s.size || 4) * 3);
+      const fontSize = Math.max(9, rawFs * scale);
+      const sx = s.x * scale + ox;
+      const sy = s.y * scale + oy;
+      const lines = (s.text || "").split("\n");
+      const lh = fontSize * 1.4;
+
+      c.font = `${fontSize}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+      c.textBaseline = "top";
+
+      let maxW = 0;
+      for (const line of lines) {
+        const w = c.measureText(line).width;
+        if (w > maxW) maxW = w;
+      }
+      const padX = s.card ? 10 * scale : 0;
+      const padY = s.card ? 8 * scale : 0;
+      const badgeH = s.badge ? 18 * scale : 0;
+      const totalW = maxW + padX * 2;
+      const totalH = lines.length * lh + padY * 2 + badgeH;
+
+      if (s.card) {
+        c.fillStyle = "rgba(14, 18, 24, 0.94)";
+        c.fillRect(sx, sy, totalW, totalH);
+        c.strokeStyle = s.color;
+        c.lineWidth = Math.max(1, 1.5 * scale);
+        c.strokeRect(sx, sy, totalW, totalH);
+        c.fillStyle = s.color;
+        c.fillRect(sx, sy, totalW, 2 * scale);
+      }
+
+      let startTextY = sy + padY;
+      if (s.badge) {
+        const bFs = Math.max(8, 10 * scale);
+        c.font = `600 ${bFs}px "JetBrains Mono", monospace`;
+        const bText = `[${s.badge.toUpperCase()}]`;
+        const bw = c.measureText(bText).width + 8 * scale;
+        c.fillStyle = s.color;
+        c.fillRect(sx + padX, sy + padY, bw, 15 * scale);
+        c.fillStyle = "#0e1114";
+        c.fillText(bText, sx + padX + 4 * scale, sy + padY + 2 * scale);
+        startTextY += 18 * scale;
+      }
+
       c.font = `${fontSize}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
       c.fillStyle = s.color;
-      c.fillText(s.text || "", s.x * scale + ox, s.y * scale + oy);
+      for (let i = 0; i < lines.length; i++) {
+        c.fillText(lines[i], sx + padX, startTextY + i * lh);
+      }
       c.restore();
       continue;
     }
@@ -255,11 +306,39 @@ function buildSvgData() {
       continue;
     }
     if (s.tool === "text") {
-      const fontSize = (s.size || 4) * 3;
-      const escaped = (s.text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      parts.push(
-        `<text x="${pt(s.x + ox)}" y="${pt(s.y + oy)}" fill="${s.color}" font-family="JetBrains Mono, ui-monospace, Menlo, monospace" font-size="${fontSize}">${escaped}</text>`
-      );
+      const rawFs = s.fontSize || Math.max(12, (s.size || 4) * 3);
+      const lines = (s.text || "").split("\n");
+      const lh = rawFs * 1.4;
+      const sx = pt(s.x + ox);
+      const sy = pt(s.y + oy);
+      const maxLen = Math.max(1, ...lines.map((l) => l.length));
+      const estW = pt(maxLen * rawFs * 0.65);
+      const padX = s.card ? 10 : 0;
+      const padY = s.card ? 8 : 0;
+      const badgeH = s.badge ? 18 : 0;
+      const totalW = pt(estW + padX * 2);
+      const totalH = pt(lines.length * lh + padY * 2 + badgeH);
+
+      let textGroup = `<g class="dev-text">`;
+      if (s.card) {
+        textGroup += `<rect x="${sx}" y="${sy}" width="${totalW}" height="${totalH}" fill="#0e1218" stroke="${s.color}" stroke-width="1.5" rx="3"/>`;
+        textGroup += `<rect x="${sx}" y="${sy}" width="${totalW}" height="2" fill="${s.color}"/>`;
+      }
+      let curY = sy + padY;
+      if (s.badge) {
+        const bText = `[${s.badge.toUpperCase()}]`;
+        const bw = bText.length * 7 + 8;
+        textGroup += `<rect x="${sx + padX}" y="${curY}" width="${bw}" height="14" fill="${s.color}" rx="2"/>`;
+        textGroup += `<text x="${sx + padX + 4}" y="${curY + 11}" fill="#0e1114" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600">${bText}</text>`;
+        curY += 18;
+      }
+      for (let i = 0; i < lines.length; i++) {
+        const escaped = lines[i].replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const lineY = pt(curY + (i + 0.85) * lh);
+        textGroup += `<text x="${sx + padX}" y="${lineY}" fill="${s.color}" font-family="JetBrains Mono, monospace" font-size="${rawFs}">${escaped}</text>`;
+      }
+      textGroup += `</g>`;
+      parts.push(textGroup);
       continue;
     }
     if (s.tool === "table") {
