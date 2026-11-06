@@ -1,15 +1,28 @@
+/* LapDraw infinite canvas — Omarchy rice (dark terminal, mono, coral) */
+
+:root {
+  --bg: #0e1114;
+  --surface: #14181d;
+  --border: #242a31;
+  --text: #ccd4dc;
+  --muted: #77828e;
+  --accent: #ff5c50;
+  --grid: rgba(132, 150, 168, 0.06);
+  --font: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+}
+
 html,
 body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #101116;
-  font: 13px/1.4 system-ui, -apple-system, sans-serif;
-  color: #e8e8ec;
-  /* subtle infinite-grid backdrop */
+  background: var(--bg);
+  font: 12.5px/1.5 var(--font);
+  color: var(--text);
+  /* subtle engineering-grid backdrop (position synced with view in JS) */
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -36,73 +49,79 @@ body {
 .bar {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 12px;
-  border-radius: 999px;
-  background: rgba(18, 18, 22, 0.92);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: rgba(14, 17, 20, 0.94);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 10px;
-  border: none;
-  border-radius: 999px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 3px;
   background: transparent;
-  color: #ddd;
-  font: 12px/1 system-ui, sans-serif;
+  color: var(--text);
+  font: 11.5px/1 var(--font);
   cursor: pointer;
 }
 
 .chip:hover {
-  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--border);
+  background: var(--surface);
 }
 
 .chip.active {
-  background: #4c8dff;
-  color: #fff;
+  border-color: var(--accent);
+  background: rgba(255, 92, 80, 0.14);
+  color: var(--accent);
 }
 
 #color {
   width: 22px;
   height: 22px;
   padding: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: none;
   cursor: pointer;
 }
 
 #size {
-  width: 90px;
-  accent-color: #4c8dff;
+  width: 88px;
+  accent-color: var(--accent);
 }
 
 .sep {
   width: 1px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 0 2px;
+  background: var(--border);
+  margin: 0 3px;
 }
 
 .help {
   margin: 8px auto 0;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
-  background: rgba(18, 18, 22, 0.72);
+  font-size: 10.5px;
+  color: var(--muted);
+  background: rgba(14, 17, 20, 0.9);
+  border: 1px solid var(--border);
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: 3px;
   width: fit-content;
 }
 
 .zoom {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 16px;
+  right: 18px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
+  letter-spacing: 1px;
 }
 
 /* zen mode: shrink toolbar to a dot, keep a place to click back */
@@ -112,10 +131,11 @@ body {
 }
 
 .hud.zen {
-  background: rgba(18, 18, 22, 0.6);
-  border-radius: 999px;
-  width: 28px;
-  height: 28px;
+  background: rgba(14, 17, 20, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
   transform: translateX(50%);
   left: 100%;
   bottom: 4px;
@@ -127,8 +147,8 @@ body {
   inset: 0;
   z-index: 20;
   overflow: auto;
-  background: rgba(10, 11, 14, 0.92);
-  padding: 40px clamp(20px, 12vw, 160px);
+  background: rgba(14, 17, 20, 0.96);
+  padding: 44px clamp(20px, 12vw, 160px);
 }
 
 .cheatsheet.hidden {
@@ -136,31 +156,40 @@ body {
 }
 
 .cheatsheet h2 {
-  font-size: 18px;
-  margin-bottom: 16px;
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.cheatsheet .sub {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-bottom: 22px;
 }
 
 .cheatsheet table {
   border-collapse: collapse;
   width: 100%;
-  max-width: 640px;
+  max-width: 680px;
 }
 
 .cheatsheet td {
-  padding: 7px 10px;
-  border-bottom: 1px solid #26272e;
-  font-size: 13px;
-  color: #cfcfd6;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text);
 }
 
 .cheatsheet td:first-child {
-  color: #8fb6ff;
+  color: var(--accent);
   white-space: nowrap;
-  width: 180px;
+  width: 200px;
 }
 
 .cheatsheet .tip {
-  margin-top: 14px;
-  font-size: 12px;
-  color: #8a8a94;
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--muted);
 }

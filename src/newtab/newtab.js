@@ -9,7 +9,7 @@ const sizeEl = document.getElementById("size");
 const zoomEl = document.getElementById("zoom");
 const cheatsheet = document.getElementById("cheatsheet");
 const hud = document.querySelector(".hud");
-const BG = "#101116";
+const BG = "#0e1114";
 const GRID = 32;
 const STORE = "lapdraw:canvas";
 

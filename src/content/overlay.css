@@ -1,4 +1,4 @@
-/* LapDraw on-page overlay (only visible while drawing mode is on) */
+/* LapDraw on-page overlay — Omarchy rice (dark terminal, mono, coral) */
 
 #lapdraw-root {
   position: fixed;
@@ -22,7 +22,6 @@ html.lapdraw-on #lapdraw-root {
   touch-action: none;
 }
 
-/* Floating mini toolbar, bottom-center */
 .lapdraw-toolbar {
   position: absolute;
   left: 50%;
@@ -30,13 +29,14 @@ html.lapdraw-on #lapdraw-root {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: rgba(18, 18, 22, 0.92);
-  color: #eee;
-  font: 12px/1 system-ui, -apple-system, sans-serif;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  gap: 5px;
+  padding: 7px 9px;
+  border-radius: 4px;
+  background: rgba(14, 17, 20, 0.94);
+  border: 1px solid #242a31;
+  color: #ccd4dc;
+  font: 11.5px/1 "JetBrains Mono", ui-monospace, monospace;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
   user-select: none;
 }
 
@@ -44,42 +44,46 @@ html.lapdraw-on #lapdraw-root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 8px;
-  border-radius: 999px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: 3px;
   background: transparent;
-  color: #ddd;
-  font: 12px/1 system-ui, sans-serif;
+  color: #ccd4dc;
+  font: 11.5px/1 "JetBrains Mono", ui-monospace, monospace;
   cursor: pointer;
 }
 
 .lapdraw-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  border-color: #242a31;
+  background: #14181d;
 }
 
 .lapdraw-btn.active {
-  background: #4c8dff;
-  color: #fff;
+  border-color: #ff5c50;
+  background: rgba(255, 92, 80, 0.14);
+  color: #ff5c50;
 }
 
 .lapdraw-color {
   width: 22px;
   height: 22px;
   padding: 0;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  border: 1px solid #242a31;
+  background: none;
   cursor: pointer;
 }
 
 .lapdraw-size {
   width: 84px;
-  accent-color: #4c8dff;
+  accent-color: #ff5c50;
 }
 
 .lapdraw-sep {
   width: 1px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #242a31;
   margin: 0 2px;
 }
