@@ -163,3 +163,18 @@ body {
   color: var(--accent);
   font-family: inherit;
 }
+
+.footbtns {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.footbtns .primary.alt {
+  flex: 1;
+}
+
+kbd {
+  font-family: inherit;
+  color: var(--accent);
+}

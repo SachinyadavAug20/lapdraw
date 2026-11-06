@@ -60,15 +60,18 @@ body {
 .chip {
   display: inline-flex;
   align-items: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 9px;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
   border: 1px solid transparent;
   border-radius: 3px;
   background: transparent;
   color: var(--text);
-  font: 11.5px/1 var(--font);
+  font: 10.5px/1 var(--font);
+  letter-spacing: 1px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .chip:hover {
@@ -82,9 +85,41 @@ body {
   color: var(--accent);
 }
 
+.chip .caret {
+  color: var(--muted);
+}
+
+.chip.icon {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+/* color palette dots */
+.palette {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--c);
+  cursor: pointer;
+}
+
+.dot:hover,
+.dot.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--bg), 0 0 0 2px var(--c);
+}
+
 #color {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border-radius: 3px;
   border: 1px solid var(--border);
@@ -93,8 +128,74 @@ body {
 }
 
 #size {
-  width: 88px;
+  width: 80px;
   accent-color: var(--accent);
+}
+
+/* vim-flavored statusbar */
+.statusbar {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 3px 12px;
+  background: rgba(14, 17, 20, 0.92);
+  border-top: 1px solid var(--border);
+  font: 10.5px/1.8 var(--font);
+  color: var(--muted);
+}
+
+.statusbar .mode {
+  color: var(--accent);
+  letter-spacing: 3px;
+}
+
+.statusbar .sb-right {
+  margin-left: auto;
+}
+
+.statusbar .sb-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+.statusbar .sb-tag.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 92, 80, 0.12);
+}
+
+.chip.toggle-on {
+  border-color: var(--accent);
+  background: rgba(255, 92, 80, 0.14);
+  color: var(--accent);
+}
+
+.canvas-text-input {
+  position: fixed;
+  background: rgba(14, 17, 20, 0.96);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  font: 13px var(--font);
+  padding: 4px 8px;
+  border-radius: 3px;
+  outline: none;
+  z-index: 100;
+  min-width: 100px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.statusbar .saved-dirty {
+  color: var(--accent);
 }
 
 .sep {
@@ -184,6 +285,11 @@ body {
   height: 1px;
   background: var(--border);
   margin: 4px 0;
+}
+
+.exportmenu .dev {
+  color: var(--muted);
+  font-size: 10px;
 }
 
 /* toast */

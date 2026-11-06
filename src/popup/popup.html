@@ -6,8 +6,8 @@
   </head>
   <body>
     <header class="head">
-      <span class="logo">✍️</span>
-      <h1>LapDraw</h1>
+      <span class="logo">▞▚</span>
+      <h1>LAPDRAW</h1>
       <span id="status" class="status">off</span>
     </header>
 
@@ -16,29 +16,31 @@
     </section>
 
     <section class="row tools">
-      <button class="chip" data-tool="pen" title="Pen">✏ Pen</button>
-      <button class="chip" data-tool="eraser" title="Eraser">🧽 Eraser</button>
+      <button class="chip" data-tool="pen" title="Pen (P)">PEN</button>
+      <button class="chip" data-tool="eraser" title="Eraser (E)">ERS</button>
     </section>
 
     <section class="row">
       <label class="lbl">Color</label>
-      <input id="color" type="color" value="#ff5c5c" />
+      <input id="color" type="color" value="#ff5c50" />
       <label class="lbl">Size</label>
       <input id="size" type="range" min="1" max="30" value="4" />
       <span id="sizeVal" class="sizeVal">4</span>
     </section>
 
     <section class="row mini">
-      <button class="chip" data-act="undo" title="Undo">↩ Undo</button>
-      <button class="chip" data-act="clear" title="Clear all strokes">Clear</button>
-      <button class="chip" data-act="save" title="Save page + drawing as PNG">💾 Save</button>
+      <button class="chip" data-act="undo" title="Undo (U / Ctrl+Z)">↩</button>
+      <button class="chip" data-act="clear" title="Clear all strokes (X)">CLR</button>
+      <button class="chip" data-act="save" title="Save page + drawing as PNG (S)">PNG</button>
     </section>
 
     <footer class="row foot">
-      <button id="openCanvas" class="primary alt">🗺 Open Infinite Canvas</button>
-      <button id="openOptions" class="chip" title="Configure shortcuts">⚙</button>
-      <p class="hint">Global: Alt+Shift+D draw · Alt+Shift+E eraser · Alt+Shift+Z undo · Alt+Shift+C canvas</p>
-      <p class="hint">While drawing: P pen · E eraser · U/R undo/redo · X clear · S save · [ ] size</p>
+      <div class="footbtns">
+        <button id="openCanvas" class="primary alt">∞ Canvas tab</button>
+        <button id="openOptions" class="chip" title="Configure shortcuts">⚙ KEYS</button>
+      </div>
+      <p class="hint"><kbd>alt+shift+d</kbd> draw · <kbd>e</kbd> eraser · <kbd>u</kbd> undo · <kbd>r</kbd> redo · <kbd>x</kbd> clear · <kbd>s</kbd> png</p>
+      <p class="hint">Global: <kbd>alt+shift+d</kbd>/<kbd>e</kbd>/<kbd>z</kbd>/<kbd>c</kbd> — remap in options</p>
     </footer>
 
     <script src="popup.js"></script>

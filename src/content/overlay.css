@@ -29,30 +29,33 @@ html.lapdraw-on #lapdraw-root {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 9px;
+  gap: 4px;
+  padding: 6px 8px;
   border-radius: 4px;
-  background: rgba(14, 17, 20, 0.94);
+  background: rgba(14, 17, 20, 0.95);
   border: 1px solid #242a31;
   color: #ccd4dc;
-  font: 11.5px/1 "JetBrains Mono", ui-monospace, monospace;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  font: 11px/1 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
   user-select: none;
+  z-index: 2147483647;
 }
 
 .lapdraw-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 7px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
   border: 1px solid transparent;
   border-radius: 3px;
   background: transparent;
   color: #ccd4dc;
-  font: 11.5px/1 "JetBrains Mono", ui-monospace, monospace;
+  font: 10.5px/1 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .lapdraw-btn:hover {
@@ -60,7 +63,8 @@ html.lapdraw-on #lapdraw-root {
   background: #14181d;
 }
 
-.lapdraw-btn.active {
+.lapdraw-btn.active,
+.lapdraw-btn.toggle-on {
   border-color: #ff5c50;
   background: rgba(255, 92, 80, 0.14);
   color: #ff5c50;
@@ -77,13 +81,48 @@ html.lapdraw-on #lapdraw-root {
 }
 
 .lapdraw-size {
-  width: 84px;
+  width: 70px;
   accent-color: #ff5c50;
 }
 
 .lapdraw-sep {
   width: 1px;
-  height: 20px;
+  height: 18px;
   background: #242a31;
   margin: 0 2px;
+}
+
+.lapdraw-text-input {
+  position: absolute;
+  background: rgba(14, 17, 20, 0.96);
+  border: 1px solid #ff5c50;
+  color: #ccd4dc;
+  font: 13px "JetBrains Mono", ui-monospace, Menlo, monospace;
+  padding: 4px 8px;
+  border-radius: 3px;
+  outline: none;
+  z-index: 2147483647;
+  min-width: 100px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.lapdraw-overlay-toast {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  padding: 6px 14px;
+  border-radius: 3px;
+  background: rgba(14, 17, 20, 0.96);
+  border: 1px solid #ff5c50;
+  color: #ff5c50;
+  font: 11px/1 "JetBrains Mono", ui-monospace, monospace;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.lapdraw-overlay-toast.show {
+  opacity: 1;
 }
