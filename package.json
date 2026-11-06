@@ -1,6 +1,6 @@
 {
   "name": "lapdraw",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Browser extension: draw on any website with your trackpad, plus an infinite canvas in a new tab.",
   "type": "module",

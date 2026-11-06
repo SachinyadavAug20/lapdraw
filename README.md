@@ -7,7 +7,7 @@
 <p align="center"><b>Draw on any website with your laptop trackpad — no mouse, no pen, no mess.</b></p>
 
 <p align="center">
-  <i>On-Page Annotation • Infinite Canvas • Trackpad-First UX • PDF / SVG / PNG Export</i>
+  <i>On-Page Annotation • Infinite Canvas • Trackpad Intelligence • SVG / React / PDF / PNG Export</i>
 </p>
 
 <p align="center">
@@ -27,66 +27,126 @@
 
 ## Overview
 
-**LAPDRAW** is a browser extension for **every laptop user whose trackpad failed them in a meeting**. Trackpads are small, jittery, and every drawing tool assumes you own a mouse or a stylus — so nobody draws. LapDraw flips that: it turns the hardware you already have into a low-lag, smoothed, stylus-like pen that works **on top of any website** and in a **distraction-free infinite canvas** tab.
+**LAPDRAW** is a browser extension engineered for **developers and laptop users whose trackpad makes freehand drawing painful**. Standard drawing apps assume a precision mouse or Apple Pencil — trying to draw with a finger on a laptop trackpad leads to jagged lines, warped boxes, jittery handwriting, and accidental clicks.
 
-It ships as a **zero-dependency**, fully local extension (MV3 for Chrome, MV2 for Firefox). Nothing leaves your machine — no accounts, no servers, no telemetry.
+LapDraw provides an **Intelligence Engine** designed specifically for laptop trackpad physics:
+1. **QuickShape & Smart Assist**: Draw a rough line, box, circle, or arrow and hold still for 450ms — it snaps into a clean vector shape!
+2. **Streamline Stabilizer**: Eliminates high-frequency friction stutter so freehand handwriting is smooth.
+3. **Fishhook Eliminator**: Strips accidental release hooks when lifting your finger.
+4. **Developer-First Tools & Exports**: Monospace text labels, directional arrows, grid snapping, and instant clipboard export as clean `<svg>` markup or React (`.tsx`) components.
+
+It ships as a **zero-dependency**, local WebExtension (MV3 for Chrome, MV2 for Firefox). No servers, no accounts, no telemetry.
 
 <p align="center">
-  <i>Vanilla JS • Pointer Events • Canvas 2D • WebExtension APIs • Zero Build Tools</i>
+  <i>Vanilla JS • Pointer Events • Canvas 2D • WebExtension APIs • Zero Build Dependencies</i>
 </p>
 
 ## Highlights
 
-- ✍️ **Draw on any page** — overlay canvas above any website, click-drag to annotate
-- 🗺 **Infinite canvas** — new-tab whiteboard with pan, zoom, grid, auto-save
-- 🧯 **Trackpad assist** — midpoint stroke smoothing, scroll-pans, pinch-zooms, Space+drag
-- ▦ **Shape tools** — freehand, line, rectangle, ellipse (Shift-constrained)
-- 📦 **Export suite** — PNG, JPG, SVG (vector), PDF, clipboard copy, `.lapboard` project files
-- ⌨️ **Configurable shortcuts** — remap every canvas key in the options page
-- 🎓 **Built-in tutorial** — guided first-run tips + in-app cheat sheet
-- 🌓 **Omarchy rice** — dark terminal theme, mono type, coral accents
+- ✍️ **Draw on Any Website** — overlay canvas above any page for code reviews, bug reports, and demos
+- 🗺 **Infinite Canvas** — new-tab whiteboard with pan, zoom, grid, and local auto-save
+- 🧠 **QuickShape Intelligence** — hold still for 450ms at the end of a stroke to snap lines, boxes, circles, and arrows
+- 🧯 **Trackpad Streamline Stabilizer** — exponential moving-average filter removes friction stutter
+- 🎣 **Fishhook Trimmer** — removes directional hook artifacts when lifting your finger
+- 📐 **Diagram Tools** — Freehand Pen, Eraser, Straight Line, Box, Ellipse, Connector Arrow, and Monospace Text
+- 📦 **Developer Export Suite** — Copy SVG markup, Copy React component (`.tsx`), Copy Markdown embed, PNG, JPG, PDF, `.lapboard` project JSON
+- ⌨️ **Configurable Shortcuts** — remap every key in the options page
+- 🌓 **Omarchy Rice** — dark terminal aesthetic, JetBrains Mono font, vim-flavored statusbar, zero emoji tofu
+
+---
+
+## Trackpad Drawing Research: Problems & Engineering Solutions
+
+Drawing with a finger on a flat trackpad differs fundamentally from using a stylus or mouse. LapDraw systematically solves the 6 core friction points of trackpad drawing:
+
+### 1. Static Friction Stutter ("Stick-Slip" Effect)
+- **The Problem**: Fingers experience micro-stiction against glass or plastic trackpads, causing small 1–4px rapid jumps and jagged, nervous lines.
+- **LapDraw's Solution**: A real-time **exponential moving-average filter** and midpoint quadratic curve interpolation absorb micro-jitter without perceptible input lag.
+
+### 2. Wobbly Geometric Shapes & Lines
+- **The Problem**: Drawing a clean straight line or a square box freehand on a trackpad is nearly impossible without a physical straightedge.
+- **LapDraw's Solution**:
+  - **QuickShape (Hold-to-Snap)**: Draw any line, rectangle, ellipse, or arrow and pause holding your finger still for 450ms. It instantly snaps into a clean vector shape! Dragging your finger adjusts the orientation and scale before releasing.
+  - **Smart Assist (Auto-Beautify)**: When `SMART` mode is active, finishing a stroke automatically tests for linearity, circularity, and rectangularity, converting rough sketches into crisp vector shapes.
+
+### 3. End-of-Stroke Finger Lift Fishhooks
+- **The Problem**: When lifting a finger from a trackpad, the finger decelerates and rolls slightly, creating a sharp 2–6px hook artifact at the end of every stroke.
+- **LapDraw's Solution**: A **directional hook detector** detects sharp angle reversals (>105°) occurring within the last 10px of a stroke and trims them on pointer release.
+
+### 4. Accidental Tap Dots & Micro-Clicks
+- **The Problem**: Tapping the trackpad or resting a thumb creates tiny 1–2px unintentional specks that clutter the canvas.
+- **LapDraw's Solution**: Strokes shorter than 3px with a duration under 80ms are debounced and filtered out.
+
+### 5. Physical Trackpad Boundary Runaway
+- **The Problem**: Trackpads are physically bounded (typically 10cm × 7cm). Drawing a large diagram runs out of physical trackpad space.
+- **LapDraw's Solution**: Native two-finger scroll panning, pinch-to-zoom, Spacebar+drag panning, and `FIT` (`0`) to center all artwork instantly.
+
+### 6. Developer Diagramming Needs
+- **The Problem**: Developers need to sketch architecture diagrams, flowcharts, explain UI components, mark up live sites, and export directly into code or documentation.
+- **LapDraw's Solution**:
+  - Connector arrow tool (`ARR`) with directional arrowheads
+  - In-place monospace text tool (`TXT`) for labeling services and endpoints
+  - Grid snap (`SNAP`) to align boxes and connectors to a 16px grid
+  - One-click **Copy SVG code** and **Copy React component (.tsx)** to paste straight into IDEs.
+
+---
 
 ## Install
 
-### Chrome
+### Chrome / Chromium / Brave / Edge
 ```bash
 npm run build
 ```
-1. `chrome://extensions` → enable **Developer mode**
-2. **Load unpacked** → select `dist/chrome`
+1. Navigate to `chrome://extensions` and enable **Developer mode** (top-right toggle).
+2. Click **Load unpacked** and select `dist/chrome`.
 
 ### Firefox
-1. `about:debugging` → **This Firefox** → **Load Temporary Add-on…**
-2. Choose any file inside `dist/firefox`
+1. Navigate to `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on…** and choose `manifest.json` inside `dist/firefox`.
 
-## Usage
+---
+
+## Usage & Shortcuts
 
 | Input | Action |
 | --- | --- |
-| Click-drag (trackpad / mouse / pen) | Draw |
-| Right-click in draw mode | Exit drawing mode |
-| Two-finger scroll | Pan (canvas) |
-| Pinch / Ctrl+scroll | Zoom (canvas) |
+| Click-drag (trackpad / mouse / pen) | Draw freehand |
+| Hold still for 450ms at end of stroke | **QuickShape**: snap straight line, box, circle, or arrow |
+| Two-finger scroll | Pan infinite canvas |
+| Pinch / Ctrl+scroll | Zoom infinite canvas |
 
-### Global shortcuts
+### Global Extension Shortcuts
+Configure these anytime at `chrome://extensions/shortcuts`:
 
-| Keys | Action |
+| Shortcut | Action |
 | --- | --- |
-| `Alt+Shift+D` | Toggle drawing on current page |
-| `Alt+Shift+E` | Pen ↔ eraser |
+| `Alt+Shift+D` | Toggle LapDraw drawing on the current web page |
+| `Alt+Shift+E` | Switch pen ↔ eraser |
 | `Alt+Shift+Z` | Undo last stroke |
-| `Alt+Shift+C` | Open infinite canvas |
+| `Alt+Shift+C` | Open infinite canvas tab |
 
-*All four are standard WebExtension commands — remap them at `chrome://extensions/shortcuts`. Every canvas-level key (pen, shapes, undo, zoom, save…) is remappable in LapDraw's own options page.*
+### Canvas & Overlay Shortcuts
+Every key below can be remapped in LapDraw's **Options Page** (click LapDraw icon → ⚙ KEYS):
 
-### Layered shortcuts
+| Tool / Action | Key | Description |
+| --- | --- | --- |
+| `PEN` | `P` | Freehand drawing (with QuickShape hold-to-snap) |
+| `ERS` | `E` | Eraser |
+| `LIN` | `L` | Straight line tool (hold Shift for 45° angle snap) |
+| `BOX` | `R` | Rectangle / box tool (hold Shift for square) |
+| `OVL` | `O` | Ellipse / circle tool (hold Shift for circle) |
+| `ARR` | `A` | Connector arrow with filled arrowhead |
+| `TXT` | `T` | Monospace text label tool (click to type) |
+| `SMART` | `M` | Toggle Smart Shape Assist on / off |
+| `SNAP` | `G` | Toggle Grid Snap (16px grid alignment) |
+| Size | `[` / `]` | Shrink / grow stroke width |
+| History | `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / redo |
+| Quick Save | `S` or `Ctrl+S` | Export full artwork PNG |
+| Clear | `Ctrl+Shift+X` (canvas) / `X` (page) | Clear all strokes |
+| Zen Mode | `Tab` | Hide / show toolbar |
+| Help | `?` or `H` | In-app cheat sheet & tutorial |
 
-| Context | Keys |
-| --- | --- |
-| **Page overlay** | `Esc` exit · `P` pen · `E` eraser · `U`/`Z` undo → `R` redo · `X` clear · `S` save · `[` `]` size |
-| **Infinite canvas** | `Space`+drag pan · arrow keys pan · `+`/`−` zoom · `0` fit · `Ctrl+1` reset zoom · `Tab` zen · `?` cheat sheet |
-
-Shape tools (`L` line, `R`* rect on canvas per keymap) use click-drag; hold **Shift** to constrain angles/shapes.
+---
 
 ## Architecture
 
@@ -94,38 +154,33 @@ Shape tools (`L` line, `R`* rect on canvas per keymap) use click-drag; hold **Sh
 src/
 ├── manifest.chrome.json     # Chrome MV3 — service worker
 ├── manifest.firefox.json    # Firefox MV2 — background page
-├── background.js            # commands, captureVisibleTab, canvas tab
+├── background.js            # tab capture, command router, canvas opener
+├── shared/
+│   └── intelligence.js      # Trackpad stabilizer, fishhook trimmer, shape recognizer
 ├── content/
-│   ├── content.js           # on-page overlay engine (strokes, export, keys)
-│   └── overlay.css
-├── popup/                   # quick controls + status
-├── newtab/                  # infinite canvas (world-space pan/zoom)
-│   ├── newtab.js            # tools, history, exporters, tutorial
-│   └── newtab.html/css
-└── options/                 # shortcut remapping + preferences
+│   ├── content.js           # On-page overlay engine (tools, QuickShape, capture)
+│   └── overlay.css          # Overlay toolbar and text annotations styling
+├── newtab/                  # Infinite Canvas
+│   ├── newtab.html          # Monospace text-first Omarchy HUD & statusbar
+│   ├── newtab.css           # Rice theme, statusbar tags, text input styles
+│   ├── newtab.js            # Pan/zoom math, tools, history, keymap registry
+│   ├── exporters.js         # Vector SVG, React TSX, PDF writer, clipboard, project JSON
+│   └── tutorial.js          # Interactive 7-step guided tour
+├── options/                 # Keymap remapping interface
+│   ├── options.html
+│   ├── options.css
+│   └── options.js
+└── popup/                   # Extension popup status and shortcuts reference
 ```
 
-- Strokes live in **CSS px** on pages (viewport-anchored) and **world coords** in the canvas (pan/zoom-safe)
-- Stroke smoothing: incremental **midpoint quadratic curves** — hardware-jitter disappears
-- **PDF export** is rendered in-page (JPEG XObject wrapped in a hand-rolled PDF writer) — no libraries
-- **SVG export** keeps every stroke as true vector paths
-- `.lapboard` files are plain JSON — portable, diffable, safe
+- **Coordinates**: On-page overlay uses viewport-anchored CSS pixels. Infinite canvas uses world-space coordinates with seamless pan/zoom transformation.
+- **Intelligence Engine**: Fast, deterministic geometric analysis running under 2ms per stroke without heavy machine learning models.
+- **PDF Export**: Hand-rolled single-page PDF generator wrapping high-res JPEG XObject with verified xref byte offsets. Zero external libraries.
+- **SVG Export**: Pure vector paths, lines, rectangles, ellipses, and text elements.
+- **Project Files**: Portable, diffable `.lapboard` JSON files storing complete vector strokes and view offsets.
 
-## Why it matters
-
-Remote classes, code reviews, design critiques — someone says "can you just mark it?" and the laptop user goes silent. LapDraw makes annotating a live page a two-finger gesture, and gives the whiteboard free in the same icon.
-
-## Roadmap
-
-- [ ] Stroke recognition → snap arrows/rects/circles
-- [ ] Per-domain persistent annotations (replay on revisit)
-- [ ] Multi-board gallery in the canvas tab
-- [ ] Trackpad "lazy-brush" stabilizer mode (adjustable assist level)
-
-## Contributing
-
-PRs welcome — vanilla JS only, no build pipeline, no frameworks. Keep the rice consistent (`doc/` shows the palette).
+---
 
 ## License
 
-MIT © 2026 — see [LICENSE](LICENSE).
+MIT © 2026 Sachin — see [LICENSE](LICENSE).
