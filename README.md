@@ -48,15 +48,27 @@ It ships as a **zero-dependency**, local WebExtension (MV3 for Chrome, MV2 for F
 - 🧠 **QuickShape Intelligence** — hold still for 450ms at the end of a stroke to snap lines, boxes, circles, and arrows
 - 🧯 **Trackpad Streamline Stabilizer** — exponential moving-average filter removes friction stutter
 - 🎣 **Fishhook Trimmer** — removes directional hook artifacts when lifting your finger
-- 📐 **Diagram Tools** — Freehand Pen, Eraser, Straight Line, Box, Ellipse, Decision Diamond, Storage Cylinder, Connector Arrow, Monospace Text, and Dashed Lines
-- 🗄 **Developer Diagram Intelligence (D)**:
-  - **Database Schemas & ER Diagrams**: Auto-generate database entity cards with columns and primary keys.
-  - **Sequence Diagrams**: Generate multi-actor lifelines with request/reply message flows and labels.
-  - **UML Class Diagrams**: Structured class cards with typed attributes and method compartments.
-  - **Architecture & Flowchart Nodes**: Microservices, Decision Diamonds, and Storage Cylinders.
+- 🎨 **8 Developer Themes (THM)** — Omarchy Rice, Dracula, Catppuccin Mocha, Tokyo Night, Nord Frost, Monokai Pro, Paper Light, Matrix Cyber with dynamic HUD palettes
+- ☩ **Radar Minimap Navigation** — real-time overview minimap showing whole-canvas content, camera viewport frustum, and click/drag-to-pan
+- ⚡ **Advanced Sequence Diagram Studio**:
+  - **Execution Specification / Lifeline Activations**: vertical execution bars on processing lifelines
+  - **Combined Decision Frames**: `alt / else` conditional branches, `loop` iterations, `opt` optional branches
+  - **Self-Call Message Loops**: native 3-segment orthogonal loopbacks
+- 🏛 **UML Class Diagram Studio & Connectors**:
+  - **Stereotypes**: `«service»`, `«interface»`, `«entity»`, `«abstract»`, `«repository»`, `«controller»`, `«enum»`
+  - **Visibility Indicators**: colored `+` public, `-` private, `#` protected, `~` package members
+  - **Relationship Connectors**: Inheritance (`<|--`), Realization (`<|..`), Composition (`*--`), Aggregation (`o--`), Dependency (`..>`), Association (`-->`)
+- 📦 **1-Click Architecture Templates**:
+  - OAuth2 PKCE Authorization Flow (Browser, SPA, Auth0 IdP, Resource API)
+  - Event-Driven Pub/Sub Microservices (API Gateway, Order Service, Kafka Topic, Inventory Service, Postgres, Redis)
+  - Clean / Hexagonal Architecture (Domain Entities, Use Cases, Adapters, Frameworks)
+  - E-Commerce Relational ERD (Interconnected users, orders, order_items, payments)
+  - Production REST Pipeline (Cloudflare CDN, Nginx, Rate Limiter, Go API, Redis, Postgres Cluster)
+  - State Machine / Statechart (Draft, Review, Approved/Rejected, Published, Archived)
+- ⚡ **Live Markdown / DSL Compiler** — type or paste PlantUML / Mermaid-compatible text to immediately compile into vector strokes on canvas
 - 📦 **Developer Export Suite** — Copy SVG markup, Copy React component (`.tsx`), Copy Mermaid.js code (`mermaid`), Copy Markdown embed, PNG, JPG, PDF, `.lapboard` project JSON
 - ⌨️ **Configurable Shortcuts** — remap every key in the options page
-- 🌓 **Omarchy Rice** — dark terminal aesthetic, JetBrains Mono font, vim-flavored statusbar, zero emoji tofu
+- 🌓 **Omarchy Rice & Monospace Fonts** — dark terminal aesthetic, JetBrains Mono font, vim-flavored statusbar
 
 ---
 

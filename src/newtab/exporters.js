@@ -4,6 +4,13 @@
 
 // ---------- shared helpers ----------
 
+function getExportBg() {
+  if (typeof window !== "undefined" && window.LapDrawTheme && typeof window.LapDrawTheme.getThemeBg === "function") {
+    return window.LapDrawTheme.getThemeBg();
+  }
+  return typeof BG !== "undefined" ? BG : "#0e1114";
+}
+
 function bounds() {
   // world-space bounds of all content (padded by half stroke width)
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -25,9 +32,12 @@ function bounds() {
       const th = lines.length * fs * 1.4 + padY * 2 + badgeH;
       grow(s.x, s.y, r);
       grow(s.x + tw, s.y + th, r);
+    } else if (s.tool === "activation") {
+      grow(s.x, s.y, r);
+      grow(s.x + (s.w || 14), s.y + (s.h || 60), r);
     } else if (s.tool === "table") {
       const sw = s.w || 220;
-      const headerH = 28;
+      const headerH = s.stereotype ? 36 : 28;
       const rowH = 22;
       const rows = s.rows || [];
       const totalH = headerH + Math.max(1, rows.length) * rowH;
@@ -53,7 +63,7 @@ function renderArtwork(scale = 1) {
   out.width = w;
   out.height = h;
   const c = out.getContext("2d");
-  c.fillStyle = BG;
+  c.fillStyle = getExportBg();
   c.fillRect(0, 0, w, h);
   c.lineCap = "round";
   c.lineJoin = "round";
@@ -129,7 +139,8 @@ function renderArtwork(scale = 1) {
       const sx = s.x * scale + ox;
       const sy = s.y * scale + oy;
       const sw = (s.w || 220) * scale;
-      const headerH = 28 * scale;
+      const hasStereotype = Boolean(s.stereotype);
+      const headerH = (hasStereotype ? 36 : 28) * scale;
       const rowH = 22 * scale;
       const rows = s.rows || [];
       const totalH = headerH + Math.max(1, rows.length) * rowH;
@@ -140,26 +151,205 @@ function renderArtwork(scale = 1) {
       c.lineWidth = Math.max(1, (s.size || 2) * scale);
       c.strokeRect(sx, sy, sw, totalH);
 
-      c.fillStyle =
-        s.type === "uml" ? "rgba(180, 140, 232, 0.16)" : "rgba(100, 168, 255, 0.16)";
+      let tint = "rgba(100, 168, 255, 0.16)";
+      if (s.stereotype === "interface") tint = "rgba(100, 200, 255, 0.18)";
+      else if (s.stereotype === "service") tint = "rgba(180, 140, 232, 0.18)";
+      else if (s.stereotype === "entity") tint = "rgba(116, 198, 157, 0.18)";
+      else if (s.stereotype === "abstract") tint = "rgba(255, 181, 71, 0.18)";
+      else if (s.type === "uml") tint = "rgba(180, 140, 232, 0.16)";
+
+      c.fillStyle = tint;
       c.fillRect(sx, sy, sw, headerH);
       c.beginPath();
       c.moveTo(sx, sy + headerH);
       c.lineTo(sx + sw, sy + headerH);
       c.stroke();
 
-      const titleFs = Math.max(10, 12 * scale);
-      c.font = `600 ${titleFs}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
-      c.fillStyle = s.color;
-      const prefix = s.type === "uml" ? "«class» " : "🗄 ";
-      c.fillText(prefix + (s.title || "Table"), sx + 8 * scale, sy + headerH * 0.68);
+      if (hasStereotype) {
+        c.font = `italic 500 ${Math.max(8, 9.5 * scale)}px "JetBrains Mono", monospace`;
+        c.fillStyle = s.color;
+        c.fillText(`«${s.stereotype}»`, sx + 8 * scale, sy + 11 * scale);
+
+        c.font = `600 ${Math.max(10, 12 * scale)}px "JetBrains Mono", monospace`;
+        c.fillText(s.title || "Class", sx + 8 * scale, sy + 25 * scale);
+      } else {
+        const titleFs = Math.max(10, 12 * scale);
+        c.font = `600 ${titleFs}px "JetBrains Mono", monospace`;
+        c.fillStyle = s.color;
+        const prefix = s.type === "uml" ? "«class» " : "🗄 ";
+        c.fillText(prefix + (s.title || "Table"), sx + 8 * scale, sy + headerH * 0.68);
+      }
 
       const rowFs = Math.max(9, 11 * scale);
-      c.font = `400 ${rowFs}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
-      c.fillStyle = "#ccd4dc";
+      c.font = `400 ${rowFs}px "JetBrains Mono", monospace`;
       for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
         const rowY = sy + headerH + (i + 0.72) * rowH;
-        c.fillText(rows[i], sx + 10 * scale, rowY);
+        if (row.startsWith("---")) {
+          c.strokeStyle = "#44475a";
+          c.lineWidth = 1;
+          c.beginPath();
+          c.moveTo(sx, sy + headerH + i * rowH + 6 * scale);
+          c.lineTo(sx + sw, sy + headerH + i * rowH + 6 * scale);
+          c.stroke();
+          continue;
+        }
+        if (row.startsWith("+")) c.fillStyle = "#74c69d";
+        else if (row.startsWith("-")) c.fillStyle = "#ff5c50";
+        else if (row.startsWith("#")) c.fillStyle = "#ffb547";
+        else if (row.startsWith("~")) c.fillStyle = "#64a8ff";
+        else c.fillStyle = "#ccd4dc";
+        c.fillText(row, sx + 10 * scale, rowY);
+      }
+      c.restore();
+      continue;
+    }
+
+    if (s.tool === "activation") {
+      const sx = s.x * scale + ox;
+      const sy = s.y * scale + oy;
+      const sw = (s.w || 14) * scale;
+      const sh = (s.h || 60) * scale;
+      c.fillStyle = s.color + "33";
+      c.fillRect(sx, sy, sw, sh);
+      c.strokeStyle = s.color;
+      c.lineWidth = Math.max(1, (s.size || 1.5) * scale);
+      c.strokeRect(sx, sy, sw, sh);
+      c.restore();
+      continue;
+    }
+
+    if (s.tool === "frame") {
+      const x1 = s.x1 * scale + ox, y1 = s.y1 * scale + oy;
+      const x2 = s.x2 * scale + ox, y2 = s.y2 * scale + oy;
+      const fx = Math.min(x1, x2), fy = Math.min(y1, y2);
+      const fw = Math.abs(x2 - x1), fh = Math.abs(y2 - y1);
+      c.strokeStyle = s.color;
+      c.lineWidth = Math.max(1, (s.size || 1.5) * scale);
+      c.strokeRect(fx, fy, fw, fh);
+
+      const tag = s.tag || "alt";
+      const tabFs = Math.max(9, 10.5 * scale);
+      c.font = `600 ${tabFs}px "JetBrains Mono", monospace`;
+      const tagW = c.measureText(tag).width;
+      const tabW = tagW + 16 * scale;
+      const tabH = 18 * scale;
+      const notch = 6 * scale;
+
+      c.beginPath();
+      c.moveTo(fx, fy);
+      c.lineTo(fx + tabW, fy);
+      c.lineTo(fx + tabW + notch, fy + tabH * 0.5);
+      c.lineTo(fx + tabW, fy + tabH);
+      c.lineTo(fx, fy + tabH);
+      c.closePath();
+      c.fillStyle = s.color + "22";
+      c.fill();
+      c.stroke();
+
+      c.fillStyle = s.color;
+      c.fillText(tag, fx + 6 * scale, fy + 13 * scale);
+
+      if (s.guard) {
+        c.font = `italic 500 ${Math.max(9, 10.5 * scale)}px "JetBrains Mono", monospace`;
+        c.fillStyle = "#ccd4dc";
+        c.fillText(`[${s.guard}]`, fx + tabW + notch + 8 * scale, fy + 13 * scale);
+      }
+
+      if (s.dividerY) {
+        const divY = s.dividerY * scale + oy;
+        c.beginPath();
+        c.setLineDash([6 * scale, 4 * scale]);
+        c.moveTo(fx, divY);
+        c.lineTo(fx + fw, divY);
+        c.stroke();
+        c.setLineDash([]);
+
+        if (s.elseGuard) {
+          c.font = `italic 500 ${Math.max(9, 10.5 * scale)}px "JetBrains Mono", monospace`;
+          c.fillStyle = "#ccd4dc";
+          c.fillText(`[${s.elseGuard}]`, fx + 10 * scale, divY + 14 * scale);
+        }
+      }
+      c.restore();
+      continue;
+    }
+
+    if (s.tool === "uml-rel") {
+      const x1 = s.x1 * scale + ox, y1 = s.y1 * scale + oy;
+      const x2 = s.x2 * scale + ox, y2 = s.y2 * scale + oy;
+      const relType = s.relType || "association";
+      const isDashed = relType === "realization" || relType === "dependency";
+      c.strokeStyle = s.color;
+      c.fillStyle = s.color;
+      c.lineWidth = Math.max(1, (s.size || 1.8) * scale);
+      if (isDashed) c.setLineDash([8 * scale, 5 * scale]);
+      else c.setLineDash([]);
+
+      const ang = Math.atan2(y2 - y1, x2 - x1);
+      const headLen = Math.max(10, 14 * scale);
+      c.beginPath();
+      c.moveTo(x1, y1);
+      c.lineTo(x2, y2);
+      c.stroke();
+      c.setLineDash([]);
+
+      if (relType === "inheritance" || relType === "realization") {
+        c.beginPath();
+        c.moveTo(x2, y2);
+        c.lineTo(x2 - headLen * Math.cos(ang - Math.PI / 6), y2 - headLen * Math.sin(ang - Math.PI / 6));
+        c.lineTo(x2 - headLen * Math.cos(ang + Math.PI / 6), y2 - headLen * Math.sin(ang + Math.PI / 6));
+        c.closePath();
+        c.fillStyle = getExportBg();
+        c.fill();
+        c.stroke();
+      } else if (relType === "composition") {
+        const dLen = headLen * 0.9;
+        c.beginPath();
+        c.moveTo(x1, y1);
+        c.lineTo(x1 + dLen * Math.cos(ang - Math.PI / 6), y1 + dLen * Math.sin(ang - Math.PI / 6));
+        c.lineTo(x1 + dLen * 1.73 * Math.cos(ang), y1 + dLen * 1.73 * Math.sin(ang));
+        c.lineTo(x1 + dLen * Math.cos(ang + Math.PI / 6), y1 + dLen * Math.sin(ang + Math.PI / 6));
+        c.closePath();
+        c.fillStyle = s.color;
+        c.fill();
+        c.stroke();
+      } else if (relType === "aggregation") {
+        const dLen = headLen * 0.9;
+        c.beginPath();
+        c.moveTo(x1, y1);
+        c.lineTo(x1 + dLen * Math.cos(ang - Math.PI / 6), y1 + dLen * Math.sin(ang - Math.PI / 6));
+        c.lineTo(x1 + dLen * 1.73 * Math.cos(ang), y1 + dLen * 1.73 * Math.sin(ang));
+        c.lineTo(x1 + dLen * Math.cos(ang + Math.PI / 6), y1 + dLen * Math.sin(ang + Math.PI / 6));
+        c.closePath();
+        c.fillStyle = getExportBg();
+        c.fill();
+        c.stroke();
+      } else if (relType === "dependency" || relType === "association") {
+        c.beginPath();
+        c.moveTo(x2 - headLen * Math.cos(ang - Math.PI / 6), y2 - headLen * Math.sin(ang - Math.PI / 6));
+        c.lineTo(x2, y2);
+        c.lineTo(x2 - headLen * Math.cos(ang + Math.PI / 6), y2 - headLen * Math.sin(ang + Math.PI / 6));
+        c.stroke();
+      }
+
+      if (s.label) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const fs = Math.max(9, 10.5 * scale);
+        c.font = `500 ${fs}px "JetBrains Mono", monospace`;
+        const textW = c.measureText(s.label).width;
+        c.fillStyle = "rgba(14, 18, 24, 0.9)";
+        c.fillRect(mx - textW / 2 - 4 * scale, my - 8 * scale, textW + 8 * scale, 16 * scale);
+        c.strokeStyle = "#44475a";
+        c.lineWidth = 1;
+        c.strokeRect(mx - textW / 2 - 4 * scale, my - 8 * scale, textW + 8 * scale, 16 * scale);
+        c.fillStyle = "#ccd4dc";
+        c.textAlign = "center";
+        c.textBaseline = "middle";
+        c.fillText(s.label, mx, my);
+        c.textAlign = "start";
+        c.textBaseline = "alphabetic";
       }
       c.restore();
       continue;
@@ -341,24 +531,81 @@ function buildSvgData() {
       parts.push(textGroup);
       continue;
     }
+    if (s.tool === "activation") {
+      const sx = pt(s.x + ox);
+      const sy = pt(s.y + oy);
+      const sw = pt(s.w || 14);
+      const sh = pt(s.h || 60);
+      parts.push(`<rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" fill="${s.color}" fill-opacity="0.2" stroke="${s.color}" stroke-width="${s.size || 1.5}"/>`);
+      continue;
+    }
+    if (s.tool === "frame") {
+      const x1 = pt(s.x1 + ox), y1 = pt(s.y1 + oy);
+      const x2 = pt(s.x2 + ox), y2 = pt(s.y2 + oy);
+      const fx = Math.min(x1, x2), fy = Math.min(y1, y2);
+      const fw = Math.abs(x2 - x1), fh = Math.abs(y2 - y1);
+      const tag = s.tag || "alt";
+      const tabW = tag.length * 8 + 18;
+      let frameSvg = `<g class="dev-frame">`;
+      frameSvg += `<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="none" stroke="${s.color}" stroke-width="${s.size || 1.5}"/>`;
+      frameSvg += `<polygon points="${fx},${fy} ${fx + tabW},${fy} ${fx + tabW + 6},${fy + 9} ${fx + tabW},${fy + 18} ${fx},${fy + 18}" fill="${s.color}" fill-opacity="0.15" stroke="${s.color}" stroke-width="${s.size || 1.5}"/>`;
+      frameSvg += `<text x="${fx + 6}" y="${fy + 13}" fill="${s.color}" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">${tag}</text>`;
+      if (s.guard) {
+        frameSvg += `<text x="${fx + tabW + 10}" y="${fy + 13}" fill="#ccd4dc" font-family="JetBrains Mono, monospace" font-size="10" font-style="italic">[${s.guard}]</text>`;
+      }
+      if (s.dividerY) {
+        const divY = pt(s.dividerY + oy);
+        frameSvg += `<line x1="${fx}" y1="${divY}" x2="${fx + fw}" y2="${divY}" stroke="${s.color}" stroke-width="${s.size || 1.5}" stroke-dasharray="6,4"/>`;
+        if (s.elseGuard) {
+          frameSvg += `<text x="${fx + 10}" y="${divY + 14}" fill="#ccd4dc" font-family="JetBrains Mono, monospace" font-size="10" font-style="italic">[${s.elseGuard}]</text>`;
+        }
+      }
+      frameSvg += `</g>`;
+      parts.push(frameSvg);
+      continue;
+    }
+    if (s.tool === "uml-rel") {
+      const x1 = pt(s.x1 + ox), y1 = pt(s.y1 + oy);
+      const x2 = pt(s.x2 + ox), y2 = pt(s.y2 + oy);
+      const isDashed = s.relType === "realization" || s.relType === "dependency";
+      const dash = isDashed ? ` stroke-dasharray="8,5"` : "";
+      let relSvg = `<g class="uml-rel">`;
+      relSvg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${s.color}" stroke-width="${s.size || 1.8}" stroke-linecap="round"${dash}/>`;
+      if (s.label) {
+        const mx = pt((x1 + x2) / 2);
+        const my = pt((y1 + y2) / 2);
+        const tw = s.label.length * 7 + 10;
+        relSvg += `<rect x="${mx - tw / 2}" y="${my - 8}" width="${tw}" height="16" fill="#14181d" stroke="#313244" rx="2"/>`;
+        relSvg += `<text x="${mx}" y="${my + 4}" fill="#ccd4dc" font-family="JetBrains Mono, monospace" font-size="10" text-anchor="middle">${s.label}</text>`;
+      }
+      relSvg += `</g>`;
+      parts.push(relSvg);
+      continue;
+    }
     if (s.tool === "table") {
       const sx = pt(s.x + ox);
       const sy = pt(s.y + oy);
       const sw = pt(s.w || 220);
-      const headerH = 28;
+      const hasStereotype = Boolean(s.stereotype);
+      const headerH = hasStereotype ? 36 : 28;
       const rowH = 22;
       const rows = s.rows || [];
       const totalH = headerH + Math.max(1, rows.length) * rowH;
       const title = (s.title || "Table").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      const prefix = s.type === "uml" ? "«class» " : "🗄 ";
+      const prefix = s.type === "uml" && !hasStereotype ? "«class» " : s.type === "uml" ? "" : "🗄 ";
       const headerFill = s.type === "uml" ? "rgba(180, 140, 232, 0.16)" : "rgba(100, 168, 255, 0.16)";
 
       let tableSvg =
         `<g class="dev-table">` +
         `<rect x="${sx}" y="${sy}" width="${sw}" height="${totalH}" fill="#12161c" stroke="${s.color}" stroke-width="${s.size || 2}" rx="4"/>` +
         `<rect x="${sx}" y="${sy}" width="${sw}" height="${headerH}" fill="${headerFill}" rx="4"/>` +
-        `<line x1="${sx}" y1="${sy + headerH}" x2="${sx + sw}" y2="${sy + headerH}" stroke="${s.color}" stroke-width="${s.size || 2}"/>` +
-        `<text x="${sx + 8}" y="${sy + 18}" fill="${s.color}" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600">${prefix}${title}</text>`;
+        `<line x1="${sx}" y1="${sy + headerH}" x2="${sx + sw}" y2="${sy + headerH}" stroke="${s.color}" stroke-width="${s.size || 2}"/>`;
+      if (hasStereotype) {
+        tableSvg += `<text x="${sx + 8}" y="${sy + 12}" fill="${s.color}" font-family="JetBrains Mono, monospace" font-size="9" font-style="italic">«${s.stereotype}»</text>`;
+        tableSvg += `<text x="${sx + 8}" y="${sy + 26}" fill="${s.color}" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600">${title}</text>`;
+      } else {
+        tableSvg += `<text x="${sx + 8}" y="${sy + 18}" fill="${s.color}" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600">${prefix}${title}</text>`;
+      }
       for (let i = 0; i < rows.length; i++) {
         const escapedRow = (rows[i] || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const ry = sy + headerH + 16 + i * rowH;
@@ -413,7 +660,7 @@ function buildSvgData() {
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">\n` +
-    `  <rect width="${w}" height="${h}" fill="${BG}"/>\n  ` +
+    `  <rect width="${w}" height="${h}" fill="${getExportBg()}"/>\n  ` +
     parts.join("\n  ") +
     `\n</svg>`;
 
@@ -510,6 +757,15 @@ function generateMermaid() {
           lines.push(`  ${safeMermaidId(fromActor.name)}${op}${safeMermaidId(toActor.name)}: ${msg}`);
         }
       }
+
+      const frames = strokes.filter((s) => s.tool === "frame").sort((a, b) => a.y1 - b.y1);
+      for (const fr of frames) {
+        lines.push(`  ${fr.tag || "alt"} ${fr.guard || ""}`);
+        if (fr.elseGuard) {
+          lines.push(`  else ${fr.elseGuard}`);
+        }
+        lines.push(`  end`);
+      }
       return lines.join("\n");
     }
   }
@@ -520,12 +776,32 @@ function generateMermaid() {
     for (const t of umlTables) {
       const name = safeMermaidId(t.title || "Class");
       lines.push(`  class ${name} {`);
+      if (t.stereotype) {
+        lines.push(`    <<${t.stereotype}>>`);
+      }
       const rows = t.rows || [];
       for (const row of rows) {
         if (row.includes("---")) continue;
         lines.push(`    ${row}`);
       }
       lines.push(`  }`);
+    }
+    const rels = strokes.filter((s) => s.tool === "uml-rel");
+    for (const r of rels) {
+      const c1 = umlTables.find((t) => Math.abs(t.x + (t.w || 220) / 2 - r.x1) < 180 && Math.abs(t.y - r.y1) < 180);
+      const c2 = umlTables.find((t) => Math.abs(t.x + (t.w || 220) / 2 - r.x2) < 180 && Math.abs(t.y - r.y2) < 180);
+      if (c1 && c2 && c1 !== c2) {
+        const id1 = safeMermaidId(c1.title);
+        const id2 = safeMermaidId(c2.title);
+        let op = "-->";
+        if (r.relType === "inheritance") op = "<|--";
+        else if (r.relType === "realization") op = "<|..";
+        else if (r.relType === "composition") op = "*--";
+        else if (r.relType === "aggregation") op = "o--";
+        else if (r.relType === "dependency") op = "..>";
+        const lbl = r.label ? ` : ${r.label}` : "";
+        lines.push(`  ${id1} ${op} ${id2}${lbl}`);
+      }
     }
     return lines.join("\n");
   }

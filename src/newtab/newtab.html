@@ -17,7 +17,8 @@
         <button class="chip tl" data-tool="ellipse" title="Ellipse / Circle (O)">OVL</button>
         <button class="chip tl" data-tool="arrow" title="Connector arrow (A)">ARR</button>
         <button class="chip tl" data-tool="text" title="Text label (T)">TXT</button>
-        <button class="chip tl dev-chip" id="openDiagModal" title="Diagram Builder — DB Tables, Sequence Diagrams, UML (D)">DIAG</button>
+        <button class="chip tl dev-chip" id="openDiagModal" title="Diagram Builder — DB Tables, Sequence Diagrams, UML, Templates & DSL (D)">DIAG</button>
+        <button class="chip tl" id="themeBtn" title="Theme (T): Omarchy, Dracula, Catppuccin, Tokyo, Nord, Monokai, Paper, Matrix">THM <span class="caret">▾</span></button>
         <div class="sep"></div>
         <div class="palette" title="Developer Palette">
           <button class="dot" data-color="#ff5c50" style="--c:#ff5c50" title="Coral"></button>
@@ -42,16 +43,65 @@
         <div class="sep"></div>
         <button class="chip tl" id="exportBtn" title="Export PNG · JPG · SVG · PDF · Code · Project">EXP&nbsp;<span class="caret">▾</span></button>
         <button class="chip tl" id="fit" title="Fit content (0)">FIT</button>
+        <button class="chip icon" id="toggleMinimap" title="Toggle Radar Minimap">☩</button>
         <button class="chip icon" id="zen" title="Toggle toolbar (Tab)">−</button>
         <button class="chip icon" id="help" title="Cheat sheet + tutorial (?)">?</button>
       </div>
-      <p class="help">click-drag draws · hold 450ms = QuickShape · <b>DIAG</b> = DB tables, UML & Sequence diagrams · <b>Shift</b>=snap</p>
+      <p class="help">click-drag draws · hold 450ms = QuickShape · <b>DIAG</b> = UML, Sequence & DB studio · <b>THM</b> = themes · <b>Shift</b>=snap</p>
       <span id="zoom" class="zoom">100%</span>
+    </div>
+
+    <!-- Theme Selection Popover Menu -->
+    <div id="themeMenu" class="thememenu hidden">
+      <div class="theme-menu-title">CANVAS & CODE THEMES</div>
+      <button data-theme-id="omarchy" class="theme-opt active">
+        <span class="theme-swatches"><span style="background:#0e1114"></span><span style="background:#ff5c50"></span><span style="background:#64a8ff"></span></span>
+        <span class="theme-info"><span class="theme-name">Omarchy Rice</span><span class="theme-desc">Dark terminal mono</span></span>
+        <span class="theme-tag">DEFAULT</span>
+      </button>
+      <button data-theme-id="dracula" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#282a36"></span><span style="background:#bd93f9"></span><span style="background:#ff79c6"></span></span>
+        <span class="theme-info"><span class="theme-name">Dracula</span><span class="theme-desc">Classic vampire purple</span></span>
+      </button>
+      <button data-theme-id="catppuccin" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#1e1e2e"></span><span style="background:#cba6f7"></span><span style="background:#89b4fa"></span></span>
+        <span class="theme-info"><span class="theme-name">Catppuccin Mocha</span><span class="theme-desc">Soothing pastel dark</span></span>
+      </button>
+      <button data-theme-id="tokyo" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#1a1b26"></span><span style="background:#7aa2f7"></span><span style="background:#7dcfff"></span></span>
+        <span class="theme-info"><span class="theme-name">Tokyo Night</span><span class="theme-desc">Clean neon metropolis</span></span>
+      </button>
+      <button data-theme-id="nord" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#2e3440"></span><span style="background:#88c0d0"></span><span style="background:#eceff4"></span></span>
+        <span class="theme-info"><span class="theme-name">Nord Frost</span><span class="theme-desc">Arctic bluish elegance</span></span>
+      </button>
+      <button data-theme-id="monokai" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#2d2a2e"></span><span style="background:#ffd866"></span><span style="background:#a9dc76"></span></span>
+        <span class="theme-info"><span class="theme-name">Monokai Pro</span><span class="theme-desc">Vibrant code syntax</span></span>
+      </button>
+      <button data-theme-id="paper" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#f6f8fa"></span><span style="background:#0969da"></span><span style="background:#1f2328"></span></span>
+        <span class="theme-info"><span class="theme-name">Paper Light</span><span class="theme-desc">Clean GitHub white</span></span>
+      </button>
+      <button data-theme-id="matrix" class="theme-opt">
+        <span class="theme-swatches"><span style="background:#080c0e"></span><span style="background:#00ff88"></span><span style="background:#00e5ff"></span></span>
+        <span class="theme-info"><span class="theme-name">Matrix Cyber</span><span class="theme-desc">Phosphor hacker glow</span></span>
+      </button>
+    </div>
+
+    <!-- Minimap Radar Widget -->
+    <div id="minimapContainer" class="minimap-container">
+      <div class="minimap-bar">
+        <span class="minimap-title">RADAR</span>
+        <button id="minimapToggleBtn" class="minimap-min-btn" title="Toggle radar view">−</button>
+      </div>
+      <canvas id="minimapCanvas" width="140" height="90"></canvas>
     </div>
 
     <div id="statusbar" class="statusbar">
       <span class="mode">LAPDRAW</span>
       <span id="sb-strokes">0 strokes · 0 pts</span>
+      <span id="sb-theme" class="sb-tag">THM: OMARCHY</span>
       <span id="sb-smart" class="sb-tag on">✦ SMART: ON</span>
       <span id="sb-snap" class="sb-tag">SNAP: OFF</span>
       <span id="sb-dash" class="sb-tag">LINE: SOLID</span>
@@ -65,13 +115,15 @@
     <div id="diagModal" class="diag-modal hidden">
       <div class="diag-box">
         <div class="diag-head">
-          <h3>⚡ DEVELOPER DIAGRAM BUILDER</h3>
+          <h3>⚡ DEVELOPER DIAGRAM &amp; UML STUDIO</h3>
           <button id="closeDiagModal" class="chip icon">✕</button>
         </div>
         <div class="diag-tabs">
           <button class="diag-tab active" data-tab="db">🗄 DB Schema</button>
-          <button class="diag-tab" data-tab="seq">⚡ Sequence Diagram</button>
-          <button class="diag-tab" data-tab="uml">🏛 UML Class</button>
+          <button class="diag-tab" data-tab="seq">⚡ Sequence Studio</button>
+          <button class="diag-tab" data-tab="uml">🏛 UML Studio</button>
+          <button class="diag-tab" data-tab="tpl">📦 Templates</button>
+          <button class="diag-tab" data-tab="dsl">⚡ Markdown / DSL</button>
           <button class="diag-tab" data-tab="node">☁ Arch Node</button>
         </div>
 
@@ -95,36 +147,173 @@ created_at: timestamp</textarea>
           <button id="insertDbTable" class="diag-primary">Insert DB Table Card</button>
         </div>
 
-        <!-- Tab 2: Sequence Diagram -->
+        <!-- Tab 2: Sequence Studio -->
         <div class="diag-pane" id="pane-seq">
+          <div class="preset-row">
+            <span class="lbl">Presets:</span>
+            <button class="chip seq-preset-btn" data-seq-preset="auth">JWT Auth Flow</button>
+            <button class="chip seq-preset-btn" data-seq-preset="payment">Checkout &amp; Stripe</button>
+            <button class="chip seq-preset-btn" data-seq-preset="ws">WebSocket Handshake</button>
+            <button class="chip seq-preset-btn" data-seq-preset="cache">Cache-Aside (Redis)</button>
+          </div>
           <label class="diag-lbl">Lifeline Actors (comma separated)</label>
           <input id="seqActors" class="diag-input" type="text" value="Client, Gateway, AuthService, Database" />
-          <label class="diag-lbl">Messages (one per line: "A -> B: text" or "B --> A: return")</label>
-          <textarea id="seqMessages" class="diag-textarea" rows="5">Client -> Gateway: POST /login {email, pass}
+          <div class="chk-row">
+            <label class="chk-label"><input type="checkbox" id="seqEnableActivations" checked /> Add Lifeline Activations (Execution Specs)</label>
+          </div>
+          <label class="diag-lbl">Messages &amp; Logic (supports "A -> B: text", "B --> A: return", "A -> A: self", "alt condition / else / end")</label>
+          <textarea id="seqMessages" class="diag-textarea" rows="6">Client -> Gateway: POST /login {email, pass}
 Gateway -> AuthService: ValidateCredentials()
 AuthService -> Database: SELECT user WHERE email
 Database --> AuthService: user record
+AuthService -> AuthService: VerifyPasswordHash(hash)
+alt valid credentials
 AuthService --> Gateway: 200 OK (JWT token)
-Gateway --> Client: Set-Cookie: session_jwt</textarea>
+Gateway --> Client: Set-Cookie: session_jwt
+else invalid password
+AuthService --> Gateway: 401 Unauthorized
+Gateway --> Client: 401 Invalid Credentials
+end</textarea>
           <button id="insertSeqDiagram" class="diag-primary">Generate Sequence Diagram</button>
         </div>
 
-        <!-- Tab 3: UML Class -->
+        <!-- Tab 3: UML Studio -->
         <div class="diag-pane" id="pane-uml">
-          <label class="diag-lbl">Class Name</label>
-          <input id="umlClassName" class="diag-input" type="text" value="OrderService" />
-          <label class="diag-lbl">Attributes / Properties (one per line)</label>
-          <textarea id="umlAttributes" class="diag-textarea" rows="3">- db: DatabasePool
+          <div class="diag-sub-section">
+            <div class="sub-head">CLASS DEFINITION</div>
+            <div class="row-2col">
+              <div>
+                <label class="diag-lbl">Class Name</label>
+                <input id="umlClassName" class="diag-input" type="text" value="OrderService" />
+              </div>
+              <div>
+                <label class="diag-lbl">Stereotype</label>
+                <select id="umlStereotype" class="diag-input">
+                  <option value="service">«service» Business Logic</option>
+                  <option value="interface">«interface» Contract</option>
+                  <option value="abstract">«abstract» Base Class</option>
+                  <option value="entity">«entity» Domain Model</option>
+                  <option value="repository">«repository» Data Access</option>
+                  <option value="controller">«controller» API Route</option>
+                  <option value="enum">«enum» Enumeration</option>
+                  <option value="class">«class» Standard Class</option>
+                </select>
+              </div>
+            </div>
+            <div class="preset-row">
+              <span class="lbl">Class Presets:</span>
+              <button class="chip uml-preset-btn" data-uml-preset="service">UserService</button>
+              <button class="chip uml-preset-btn" data-uml-preset="interface">IRepository</button>
+              <button class="chip uml-preset-btn" data-uml-preset="entity">UserEntity</button>
+              <button class="chip uml-preset-btn" data-uml-preset="controller">AuthController</button>
+            </div>
+            <label class="diag-lbl">Attributes / Properties (one per line, e.g. "- db: DatabasePool")</label>
+            <textarea id="umlAttributes" class="diag-textarea" rows="3">- db: DatabasePool
 - redis: CacheClient
 - stripeApiKey: string</textarea>
-          <label class="diag-lbl">Methods (one per line)</label>
-          <textarea id="umlMethods" class="diag-textarea" rows="3">+ checkout(cart: Cart): Promise&lt;Order&gt;
+            <label class="diag-lbl">Methods (one per line, e.g. "+ checkout(cart): Promise&lt;Order&gt;")</label>
+            <textarea id="umlMethods" class="diag-textarea" rows="3">+ checkout(cart: Cart): Promise&lt;Order&gt;
 + refund(orderId: string): Promise&lt;void&gt;
 + calculateTax(amount: number): number</textarea>
-          <button id="insertUmlClass" class="diag-primary">Insert UML Class Box</button>
+            <button id="insertUmlClass" class="diag-primary">Insert UML Class Box</button>
+          </div>
+
+          <div class="diag-sub-section" style="margin-top: 14px;">
+            <div class="sub-head">UML RELATIONSHIP CONNECTOR</div>
+            <div class="row-3col">
+              <div>
+                <label class="diag-lbl">From Class</label>
+                <input id="umlRelFrom" class="diag-input" type="text" value="OrderService" />
+              </div>
+              <div>
+                <label class="diag-lbl">Relationship</label>
+                <select id="umlRelType" class="diag-input">
+                  <option value="inheritance">Inheritance (&lt;|-- extends)</option>
+                  <option value="realization">Realization (&lt;|.. implements)</option>
+                  <option value="composition">Composition (*-- composed of)</option>
+                  <option value="aggregation">Aggregation (o-- aggregates)</option>
+                  <option value="dependency">Dependency (..&gt; depends on)</option>
+                  <option value="association">Association (--&gt; has / uses)</option>
+                </select>
+              </div>
+              <div>
+                <label class="diag-lbl">To Class</label>
+                <input id="umlRelTo" class="diag-input" type="text" value="IOrderRepository" />
+              </div>
+            </div>
+            <label class="diag-lbl">Multiplicity / Label (optional)</label>
+            <input id="umlRelLabel" class="diag-input" type="text" value="1..*" placeholder="e.g. implements, 1..*, 0..1" />
+            <button id="insertUmlRel" class="diag-secondary">Connect Classes</button>
+          </div>
         </div>
 
-        <!-- Tab 4: Architecture Node -->
+        <!-- Tab 4: System Architecture Templates -->
+        <div class="diag-pane" id="pane-tpl">
+          <div class="tpl-desc">Click any professional system architecture template to immediately spawn it on the canvas:</div>
+          <div class="tpl-grid">
+            <button class="tpl-card" data-tpl="oauth2">
+              <div class="tpl-icon">🔐</div>
+              <div class="tpl-title">OAuth2 PKCE Flow</div>
+              <div class="tpl-sub">Browser, SPA Client, Auth0 IdP &amp; Resource API with token exchange &amp; error frame</div>
+            </button>
+            <button class="tpl-card" data-tpl="microservices">
+              <div class="tpl-icon">⚡</div>
+              <div class="tpl-title">Event-Driven Pub/Sub</div>
+              <div class="tpl-sub">API Gateway, Order Service, Kafka Topic, Inventory Service, Postgres &amp; Redis</div>
+            </button>
+            <button class="tpl-card" data-tpl="clean-arch">
+              <div class="tpl-icon">🧅</div>
+              <div class="tpl-title">Clean / Hexagonal Arch</div>
+              <div class="tpl-sub">Domain Entities, Use Cases, Adapters, Frameworks with dependency inversion</div>
+            </button>
+            <button class="tpl-card" data-tpl="erd">
+              <div class="tpl-icon">🗄</div>
+              <div class="tpl-title">E-Commerce Schema (ERD)</div>
+              <div class="tpl-sub">Interconnected users, orders, order_items, and payments with FK relationships</div>
+            </button>
+            <button class="tpl-card" data-tpl="rest-pipeline">
+              <div class="tpl-icon">🚀</div>
+              <div class="tpl-title">Production REST Pipeline</div>
+              <div class="tpl-sub">Cloudflare CDN, Nginx Reverse Proxy, Rate Limiter, Go API, Redis, Postgres Cluster</div>
+            </button>
+            <button class="tpl-card" data-tpl="state-machine">
+              <div class="tpl-icon">🔄</div>
+              <div class="tpl-title">State Machine (Statechart)</div>
+              <div class="tpl-sub">Draft, Review, Approved, Rejected, Published, Archived with guarded transitions</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 5: Markdown / DSL Compiler -->
+        <div class="diag-pane" id="pane-dsl">
+          <div class="preset-row">
+            <span class="lbl">DSL Presets:</span>
+            <button class="chip dsl-preset-btn" data-dsl-preset="seq">Sequence with Alt/Loop</button>
+            <button class="chip dsl-preset-btn" data-dsl-preset="uml">UML with Relations</button>
+            <button class="chip dsl-preset-btn" data-dsl-preset="flow">Architecture Flow</button>
+          </div>
+          <label class="diag-lbl">PlantUML / Mermaid-compatible DSL text</label>
+          <textarea id="dslInput" class="diag-textarea" rows="9" spellcheck="false">sequence:
+participant Client
+participant Gateway
+participant AuthService
+participant Database
+
+Client -> Gateway: POST /api/login
+Gateway -> AuthService: Authenticate(credentials)
+AuthService -> Database: SELECT * FROM users WHERE email
+Database --> AuthService: user_record
+alt valid password
+AuthService --> Gateway: 200 OK + JWT Token
+Gateway --> Client: 200 Set-Cookie: token
+else invalid password
+AuthService --> Gateway: 401 Unauthorized
+Gateway --> Client: 401 Invalid Credentials
+end</textarea>
+          <button id="compileDsl" class="diag-primary">⚡ Compile &amp; Insert into Canvas</button>
+        </div>
+
+        <!-- Tab 6: Architecture Node -->
         <div class="diag-pane" id="pane-node">
           <label class="diag-lbl">Node Shape / Component</label>
           <select id="archNodeType" class="diag-input">
@@ -161,11 +350,13 @@ Gateway --> Client: Set-Cookie: session_jwt</textarea>
       <h2>LapDraw Canvas — Developer Shortcuts</h2>
       <table>
         <tr><td>Draw</td><td>click-drag (trackpad / mouse / pen)</td></tr>
-        <tr><td>QuickShape</td><td>draw & hold still 450ms: line, box, circle, diamond, cylinder, arrow</td></tr>
-        <tr><td>Diagram Builder</td><td>D: open DB Tables, Sequence Diagram & UML generator</td></tr>
+        <tr><td>QuickShape</td><td>draw &amp; hold still 450ms: line, box, circle, diamond, cylinder, arrow</td></tr>
+        <tr><td>Diagram Builder</td><td>D: open DB Tables, Sequence Diagram &amp; UML generator</td></tr>
         <tr><td>Tools</td><td>P pen · E eraser · L line · R rect · O ellipse · A arrow · T text</td></tr>
         <tr><td>Toggles</td><td>M smart assist · G grid snap · K dashed lines · Tab zen mode</td></tr>
-        <tr><td>Pan & Zoom</td><td>two-finger scroll pans · pinch zooms · 0 fit · Ctrl+1 100%</td></tr>
+        <tr><td>Themes</td><td>THM button in HUD · 8 developer themes</td></tr>
+        <tr><td>Radar Minimap</td><td>☩ button in HUD or bottom-right radar canvas</td></tr>
+        <tr><td>Pan &amp; Zoom</td><td>two-finger scroll pans · pinch zooms · 0 fit · Ctrl+1 100%</td></tr>
         <tr><td>History</td><td>Ctrl+Z undo · Ctrl+Shift+Z (or Ctrl+Y) redo</td></tr>
         <tr><td>Quick Save</td><td>S or Ctrl+S (PNG artwork)</td></tr>
         <tr><td>Clear canvas</td><td>Ctrl+Shift+X</td></tr>

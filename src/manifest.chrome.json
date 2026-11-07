@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LapDraw — Trackpad Drawing",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Draw on any website with your laptop trackpad, or open an infinite canvas in a new tab. Built for people without a pen or mouse.",
   "permissions": ["activeTab", "storage", "tabs"],
   "action": {
