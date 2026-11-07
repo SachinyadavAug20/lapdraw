@@ -1336,13 +1336,18 @@ document.getElementById("replayTutorial").addEventListener("click", () => {
   window.lapdrawTutorial && window.lapdrawTutorial.start();
 });
 
-const openTutHandler = () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL("tutorial/tutorial.html") });
-};
-const openTutBtn = document.getElementById("openTutorialTab");
-if (openTutBtn) openTutBtn.addEventListener("click", openTutHandler);
+const openDocsBtn = document.getElementById("openDocsTab");
+if (openDocsBtn) {
+  openDocsBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("docs/docs.html") });
+  });
+}
 const openFullTutBtn = document.getElementById("openFullTutorial");
-if (openFullTutBtn) openFullTutBtn.addEventListener("click", openTutHandler);
+if (openFullTutBtn) {
+  openFullTutBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("tutorial/tutorial.html") });
+  });
+}
 
 // ----- Developer Diagram Builder Modal -----
 const diagModal = document.getElementById("diagModal");

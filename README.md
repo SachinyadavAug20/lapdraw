@@ -4,10 +4,9 @@
 
 <h1 align="center">LAPDRAW</h1>
 
-<p align="center"><b>Draw on any website with your laptop trackpad — no mouse, no pen, no mess.</b></p>
-
 <p align="center">
-  <i>On-Page Annotation • Infinite Canvas • Trackpad Intelligence • SVG / React / PDF / PNG Export</i>
+  <b>Draw on any website with your laptop trackpad — no mouse, no pen, no mess.</b><br/>
+  <i>Engineered for software developers, system architects, and code reviewers.</i>
 </p>
 
 <p align="center">
@@ -17,195 +16,188 @@
   <img src="https://img.shields.io/badge/Chrome-4285F4?style=flat&logo=googlechrome&logoColor=white" alt="Chrome" />
   <img src="https://img.shields.io/badge/Firefox-FF7139?style=flat&logo=firefox&logoColor=white" alt="Firefox" />
   <img src="https://img.shields.io/badge/Dependencies-Zero-33CC77" alt="Zero dependencies" />
-</p>
-
-<p align="center">
   <a href="#-license"><img alt="License" src="https://img.shields.io/badge/License-MIT-FF5C50?style=flat-square"></a>
 </p>
 
 ---
 
-## Overview
-
-**LAPDRAW** is a browser extension engineered for **developers and laptop users whose trackpad makes freehand drawing painful**. Standard drawing apps assume a precision mouse or Apple Pencil — trying to draw with a finger on a laptop trackpad leads to jagged lines, warped boxes, jittery handwriting, and accidental clicks.
-
-LapDraw provides an **Intelligence Engine** designed specifically for laptop trackpad physics:
-1. **QuickShape & Smart Assist**: Draw a rough line, box, circle, or arrow and hold still for 450ms — it snaps into a clean vector shape!
-2. **Streamline Stabilizer**: Eliminates high-frequency friction stutter so freehand handwriting is smooth.
-3. **Fishhook Eliminator**: Strips accidental release hooks when lifting your finger.
-4. **Developer-First Tools & Exports**: Monospace text labels, directional arrows, grid snapping, and instant clipboard export as clean `<svg>` markup or React (`.tsx`) components.
-
-It ships as a **zero-dependency**, local WebExtension (MV3 for Chrome, MV2 for Firefox). No servers, no accounts, no telemetry.
+## 📸 Visual Showcase
 
 <p align="center">
-  <i>Vanilla JS • Pointer Events • Canvas 2D • WebExtension APIs • Zero Build Dependencies</i>
+  <b>1. On-Page Web & Documentation Annotation (<kbd>Alt+Shift+D</kbd>)</b><br/>
+  <img src="docs/ss/on-page-annotation.png" alt="On-Page Annotation on Wikipedia" width="90%" />
 </p>
 
-## Highlights
+<p align="center">
+  <b>2. Infinite Canvas Whiteboard (<kbd>Alt+Shift+C</kbd>)</b><br/>
+  <img src="docs/ss/infinite-canvas.png" alt="Infinite Canvas New Tab" width="90%" />
+</p>
 
-- ✍️ **Draw on Any Website** — overlay canvas above any page for code reviews, bug reports, and demos
-- 🔍 **GitHub PR Review Mode & Badges** — translucent highlighter (`HL`), diff line spotlight (`SPOT`), review stamps (`[LGTM]`, `[BUG]`, `[SECURITY]`, `[NIT]`, `[REQ CHANGES]`, `[PERF]`, `[QUESTION]`), and 1-click "Copy for GitHub PR"
-- 📖 **Persistent Docs & PDF Notebook** — floating notebook panel (`NOTES`) auto-saved per URL in `chrome.storage.local` with 1-click Markdown export for Obsidian, Notion, and Logseq
-- 🎓 **Interactive In-App Developer Lab & Tutorial** — hands-on interactive playground (`tutorial/tutorial.html`) with live sandboxes for QuickShape, GitHub code diffs, and live DSL compiling
-- 🗺 **Infinite Canvas** — new-tab whiteboard with pan, zoom, grid, and local auto-save
-- 🧠 **QuickShape Intelligence** — hold still for 450ms at the end of a stroke to snap lines, boxes, circles, diamonds, cylinders, and arrows
-- 🧯 **Trackpad Streamline Stabilizer** — exponential moving-average filter removes friction stutter
-- 🎣 **Fishhook Trimmer** — removes directional hook artifacts when lifting your finger
-- 🎨 **8 Developer Themes (THM)** — Omarchy Rice, Dracula, Catppuccin Mocha, Tokyo Night, Nord Frost, Monokai Pro, Paper Light, Matrix Cyber with dynamic HUD palettes
-- ☩ **Radar Minimap Navigation** — real-time overview minimap showing whole-canvas content, camera viewport frustum, and click/drag-to-pan
-- ⚡ **Advanced Sequence Diagram Studio**:
-  - **Execution Specification / Lifeline Activations**: vertical execution bars on processing lifelines
-  - **Combined Decision Frames**: `alt / else` conditional branches, `loop` iterations, `opt` optional branches
-  - **Self-Call Message Loops**: native 3-segment orthogonal loopbacks
-- 🏛 **UML Class Diagram Studio & Connectors**:
-  - **Stereotypes**: `«service»`, `«interface»`, `«entity»`, `«abstract»`, `«repository»`, `«controller»`, `«enum»`
-  - **Visibility Indicators**: colored `+` public, `-` private, `#` protected, `~` package members
-  - **Relationship Connectors**: Inheritance (`<|--`), Realization (`<|..`), Composition (`*--`), Aggregation (`o--`), Dependency (`..>`), Association (`-->`)
-- 📦 **1-Click Architecture Templates**:
-  - OAuth2 PKCE Authorization Flow (Browser, SPA, Auth0 IdP, Resource API)
-  - Event-Driven Pub/Sub Microservices (API Gateway, Order Service, Kafka Topic, Inventory Service, Postgres, Redis)
-  - Clean / Hexagonal Architecture (Domain Entities, Use Cases, Adapters, Frameworks)
-  - E-Commerce Relational ERD (Interconnected users, orders, order_items, payments)
-  - Production REST Pipeline (Cloudflare CDN, Nginx, Rate Limiter, Go API, Redis, Postgres Cluster)
-  - State Machine / Statechart (Draft, Review, Approved/Rejected, Published, Archived)
-- ⚡ **Live Markdown / DSL Compiler** — type or paste PlantUML / Mermaid-compatible text to immediately compile into vector strokes on canvas
-- 📦 **Developer Export Suite** — Copy SVG markup, Copy React component (`.tsx`), Copy Mermaid.js code (`mermaid`), Copy Markdown embed, PNG, JPG, PDF, `.lapboard` project JSON
-- ⌨️ **Configurable Shortcuts** — remap every key in the options page
-- 🌓 **Omarchy Rice & Monospace Fonts** — dark terminal aesthetic, JetBrains Mono font, vim-flavored statusbar
-- 📚 **Comprehensive Guides**: [Developer Guide](docs/DEVELOPER_GUIDE.md) · [GitHub Reviews & Docs Notes](docs/GITHUB_AND_DOCS_NOTES.md)
+<p align="center">
+  <b>3. Keyboard Maestro Cheatsheet (<kbd>?</kbd>)</b><br/>
+  <img src="docs/ss/cheatsheet-shortcuts.png" alt="In-App Shortcuts Cheatsheet" width="90%" />
+</p>
+
+<p align="center">
+  <b>4. Rebindable Keymap Options</b><br/>
+  <img src="docs/ss/options-keymap.png" alt="Options Page Keybindings" width="90%" />
+</p>
 
 ---
 
-## Trackpad Drawing Research: Problems & Engineering Solutions
+## 🖐️ QuickShape: Trackpad Hold-to-Snap
 
-Drawing with a finger on a flat trackpad differs fundamentally from using a stylus or mouse. LapDraw systematically solves the 6 core friction points of trackpad drawing:
+Drawing with a finger on a laptop trackpad causes friction jitter and wobbly shapes. LapDraw fixes this algorithmically:
 
-### 1. Static Friction Stutter ("Stick-Slip" Effect)
-- **The Problem**: Fingers experience micro-stiction against glass or plastic trackpads, causing small 1–4px rapid jumps and jagged, nervous lines.
-- **LapDraw's Solution**: A real-time **exponential moving-average filter** and midpoint quadratic curve interpolation absorb micro-jitter without perceptible input lag.
+```
+[ 🖐️ Trackpad Doodle ] ───( Hold still for 450ms )───▶ [ ✨ Crisp Vector Shape ]
+  Wobbly line, box, circle, arrow, diamond, or cylinder snaps into clean geometry!
+```
 
-### 2. Wobbly Geometric Shapes & Lines
-- **The Problem**: Drawing a clean straight line or a square box freehand on a trackpad is nearly impossible without a physical straightedge.
-- **LapDraw's Solution**:
-  - **QuickShape (Hold-to-Snap)**: Draw any line, rectangle, ellipse, diamond, cylinder, or arrow and pause holding your finger still for 450ms. It instantly snaps into a clean vector shape! Dragging your finger adjusts the orientation and scale before releasing.
-  - **Smart Assist (Auto-Beautify)**: When `SMART` mode is active, finishing a stroke automatically tests for linearity, circularity, rectangularity, diamonds, and cylinders, converting rough sketches into crisp vector shapes.
-
-### 3. End-of-Stroke Finger Lift Fishhooks
-- **The Problem**: When lifting a finger from a trackpad, the finger decelerates and rolls slightly, creating a sharp 2–6px hook artifact at the end of every stroke.
-- **LapDraw's Solution**: A **directional hook detector** detects sharp angle reversals (>105°) occurring within the last 10px of a stroke and trims them on pointer release.
-
-### 4. Accidental Tap Dots & Micro-Clicks
-- **The Problem**: Tapping the trackpad or resting a thumb creates tiny 1–2px unintentional specks that clutter the canvas.
-- **LapDraw's Solution**: Strokes shorter than 3px with a duration under 80ms are debounced and filtered out.
-
-### 5. Physical Trackpad Boundary Runaway
-- **The Problem**: Trackpads are physically bounded (typically 10cm × 7cm). Drawing a large diagram runs out of physical trackpad space.
-- **LapDraw's Solution**: Native two-finger scroll panning, pinch-to-zoom, Spacebar+drag panning, and `FIT` (`0`) to center all artwork instantly.
-
-### 6. Developer Diagramming Needs
-- **The Problem**: Developers need to sketch architecture diagrams, database schemas, sequence flows, and explain system designs, then export directly into code or documentation.
-- **LapDraw's Solution**:
-  - In-app **Diagram Builder (`D`)** for Database Schemas, Sequence Diagrams, UML Classes, and Architecture Nodes
-  - Connector arrow tool (`ARR`) and dashed line mode (`DASH` / `K`)
-  - Decision diamonds and storage cylinder primitives
-  - In-place monospace text tool (`TXT`) for labeling services and endpoints
-  - Grid snap (`SNAP` / `G`) to align boxes and connectors to a 16px grid
-  - One-click **Copy SVG code**, **Copy React component (.tsx)**, and **Copy Mermaid.js code** to paste straight into IDEs, Markdown, or GitHub PRs.
+| ❌ Without LapDraw | ✨ With LapDraw QuickShape |
+|---|---|
+| Jittery, jagged trackpad strokes | **Catmull-Rom streamline smoothing** mid-air |
+| Sharp hook artifact when lifting finger | **Fishhook trimmer** strips end-of-stroke rolls |
+| Wobbly, uneven rectangles & circles | **450ms hold-to-snap** calculates radius variance & snaps to clean vectors |
 
 ---
 
-## Install
+## 🔍 GitHub PR Review Mode in 3 Steps
 
-### Chrome / Chromium / Brave / Edge
+Point out race conditions, memory leaks, and nil pointers visually on any code diff:
+
+```
+Step 1: Highlight Code     Step 2: Stamp Review Badge      Step 3: 1-Click Copy
+   [ HL Tool / H ]        [ STAMP Menu: LGTM, BUG... ]        [ GH-PR Button / G ]
+         │                              │                               │
+         ▼                              ▼                               ▼
+  Translucent band               Placed directly on             Copies screenshot +
+  preserves syntax               line with comment              markdown for comment
+```
+
+### Review Stamp Badges
+- `✓ [LGTM]` (#2ed573) — Looks good to me
+- `✖ [BUG]` (#ff4757) — Crash / unhandled exception
+- `🔒 [SECURITY]` (#a55eea) — Injection vulnerability / auth risk
+- `✎ [NIT]` (#ffa502) — Code style / formatting
+- `⚠ [REQ CHANGES]` (#ff7f50) — Must resolve before merge
+- `⚡ [PERF]` (#00d2d3) — O(N²) loop / heavy allocation
+- `? [QUESTION]` (#1e90ff) — Clarification needed
+
+---
+
+## 📖 Persistent Documentation & PDF Notebook (<kbd>N</kbd>)
+
+Never lose notes when reading technical specs, RFCs, or local PDFs:
+
+```
+[ 🌐 Any Webpage / PDF ] ──▶ [ 📖 URL-Scoped Notes ] ──▶ [ 📥 Export Markdown ]
+  (react.dev, mdn, file://)   Auto-saved in local storage     Ready for Obsidian/Notion
+```
+
+- **Per-URL Scoped**: Notes restore automatically whenever you revisit the page.
+- **Semantic Tag Chips**: 1-click insert `+ [TODO]`, `+ [KEY POINT]`, `+ [API REF]`, `+ [BUG]`.
+- **📸 Snapshots**: Embeds drawing screenshot markers directly into notes.
+- **💾 1-Click Export**: Downloads clean `.md` Markdown files.
+
+---
+
+## ⚡ Architecture & Sequence Diagram Studio (<kbd>D</kbd>)
+
+Press <kbd>D</kbd> on the infinite canvas to launch the visual diagram generator:
+
+- **Sequence Diagrams**:
+  - Lifeline execution activations (vertical CPU processing bars)
+  - Combined fragments (`alt / else`, `loop`, `opt`)
+  - 3-segment orthogonal self-call loops
+- **UML Class Studio**:
+  - Stereotypes: `«service»`, `«interface»`, `«entity»`, `«repository»`
+  - Colored visibility: `+public`, `-private`, `#protected`, `~package`
+  - 6 Relationship connectors: `<|--`, `<|..`, `*--`, `o--`, `..>`, `-->`
+- **Database Relational ERD**:
+  - Relational schema tables with `PK`, `FK`, and data types (`UUID`, `VARCHAR`, `TIMESTAMPTZ`)
+- **Live DSL Compiler**:
+  - Type PlantUML/Mermaid-style text on the left, watch it render live into vector strokes on the right!
+
+---
+
+## 🎨 8 Developer Themes (<kbd>THM</kbd>)
+
+| Theme | Swatch | Primary Accent | Vibe |
+|---|---|---|---|
+| **Omarchy Rice** | ⬛ 🟥 🟦 | Coral `#ff5c50` | Default dark terminal rice |
+| **Dracula** | 🟪 🟪 🟩 | Purple `#bd93f9` | Vampire purple & neon pink |
+| **Catppuccin** | 🟦 🟪 🟩 | Lavender `#cba6f7` | Soothing pastel dark mocha |
+| **Tokyo Night** | 🟦 🟦 🟩 | Cyan `#7dcfff` | Cyberpunk metropolis |
+| **Nord Frost** | 🟦 ⬜ 🟩 | Arctic Ice `#88c0d0` | Arctic soft elegance |
+| **Monokai Pro** | 🟨 🟥 🟩 | Gold `#ffd866` | Vibrant code syntax |
+| **Paper Light** | ⬜ 🟦 🟥 | GitHub Blue `#0969da` | Light paper print mode |
+| **Matrix Cyber** | ⬛ 🟩 🟦 | Phosphor `#00ff88` | Green phosphor hacker glow |
+
+---
+
+## 🛠️ Tool Cheat Card
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  P  PEN      Freehand streamline pen (Hold 450ms for QuickShape)       │
+│  H  HL       Translucent highlighter band for code & docs              │
+│  E  ERS      Eraser tool                                               │
+│  L  LIN      Straight line (Hold Shift for 45° angle snap)             │
+│  R  BOX      Box / Rectangle container (Hold Shift for square)         │
+│  A  ARR      Directional connector arrow                               │
+│  T  TXT      Monospace text note / label                               │
+│  F  SPOT     Diff spotlight focus scrim                                │
+│  K  STAMP    Review stamp badges menu ([LGTM], [BUG], [SECURITY]...)   │
+│  N  NOTES    URL-scoped documentation & PDF notes drawer               │
+│  G  GH-PR    Copy composite screenshot + review Markdown to clipboard  │
+│  D  DIAG     Sequence diagrams, UML classes & DB schema builder        │
+│  ☩  RADAR    Radar minimap overview with camera viewport frustum       │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⌨️ Global Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| <kbd>Alt+Shift+D</kbd> | Toggle drawing overlay on any webpage |
+| <kbd>Alt+Shift+E</kbd> | Toggle Pen ↔ Eraser |
+| <kbd>Alt+Shift+C</kbd> | Open Infinite Canvas tab |
+| <kbd>Alt+Shift+Z</kbd> | Undo last stroke |
+| <kbd>Two-finger scroll</kbd> | Pan canvas infinitely |
+| <kbd>Pinch trackpad</kbd> | Smooth zoom around cursor |
+| <kbd>0</kbd> | Fit all content to screen |
+| <kbd>Tab</kbd> | Zen mode (hide/show toolbar) |
+| <kbd>?</kbd> | Cheat sheet & in-app interactive lab |
+
+*All shortcuts rebindable: click LapDraw icon → **⚙ KEYS**.*
+
+---
+
+## 📦 Install & Build
+
+### Chrome / Brave / Edge (Manifest V3)
 ```bash
 npm run build
 ```
-1. Navigate to `chrome://extensions` and enable **Developer mode** (top-right toggle).
+1. Open `chrome://extensions` and enable **Developer mode**.
 2. Click **Load unpacked** and select `dist/chrome`.
 
-### Firefox
-1. Navigate to `about:debugging#/runtime/this-firefox`.
-2. Click **Load Temporary Add-on…** and choose `manifest.json` inside `dist/firefox`.
+### Firefox (Manifest V2)
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on…** and choose `dist/firefox/manifest.json`.
 
 ---
 
-## Usage & Shortcuts
-
-| Input | Action |
-| --- | --- |
-| Click-drag (trackpad / mouse / pen) | Draw freehand |
-| Hold still for 450ms at end of stroke | **QuickShape**: snap straight line, box, circle, or arrow |
-| Two-finger scroll | Pan infinite canvas |
-| Pinch / Ctrl+scroll | Zoom infinite canvas |
-
-### Global Extension Shortcuts
-Configure these anytime at `chrome://extensions/shortcuts`:
-
-| Shortcut | Action |
-| --- | --- |
-| `Alt+Shift+D` | Toggle LapDraw drawing on the current web page |
-| `Alt+Shift+E` | Switch pen ↔ eraser |
-| `Alt+Shift+Z` | Undo last stroke |
-| `Alt+Shift+C` | Open infinite canvas tab |
-
-### Canvas & Overlay Shortcuts
-Every key below can be remapped in LapDraw's **Options Page** (click LapDraw icon → ⚙ KEYS):
-
-| Tool / Action | Key | Description |
-| --- | --- | --- |
-| `PEN` | `P` | Freehand drawing (with QuickShape hold-to-snap) |
-| `ERS` | `E` | Eraser |
-| `LIN` | `L` | Straight line tool (hold Shift for 45° angle snap) |
-| `BOX` | `R` | Rectangle / box tool (hold Shift for square) |
-| `OVL` | `O` | Ellipse / circle tool (hold Shift for circle) |
-| `ARR` | `A` | Connector arrow with filled arrowhead |
-| `TXT` | `T` | Monospace text label tool (click to type) |
-| `DIAG` | `D` | Open Developer Diagram Builder (DB Schema, Sequence, UML, Arch) |
-| `DASH` | `K` | Toggle Dashed connector / stroke mode |
-| `SMART` | `M` | Toggle Smart Shape Assist on / off |
-| `SNAP` | `G` | Toggle Grid Snap (16px grid alignment) |
-| Size | `[` / `]` | Shrink / grow stroke width |
-| History | `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / redo |
-| Quick Save | `S` or `Ctrl+S` | Export full artwork PNG |
-| Clear | `Ctrl+Shift+X` (canvas) / `X` (page) | Clear all strokes |
-| Zen Mode | `Tab` | Hide / show toolbar |
-| Help | `?` or `H` | In-app cheat sheet & tutorial |
+## 📚 Dedicated Documentation & Interactive Lab
+- [**Visual Feature Showcase**](src/docs/docs.html) — in-extension visual walkthrough with interactive test pad
+- [**Interactive Developer Lab**](src/tutorial/tutorial.html) — 7 hands-on lessons with live simulated GitHub diffs & DSL editor
+- [**Developer Architecture Guide**](docs/DEVELOPER_GUIDE.md) — deep-dive reference manual with technical specifications
+- [**GitHub Reviews & Docs Notes**](docs/GITHUB_AND_DOCS_NOTES.md) — step-by-step practical review manual
 
 ---
 
-## Architecture
-
-```
-src/
-├── manifest.chrome.json     # Chrome MV3 — service worker
-├── manifest.firefox.json    # Firefox MV2 — background page
-├── background.js            # tab capture, command router, canvas opener
-├── shared/
-│   └── intelligence.js      # Trackpad stabilizer, fishhook trimmer, shape recognizer
-├── content/
-│   ├── content.js           # On-page overlay engine (tools, QuickShape, capture)
-│   └── overlay.css          # Overlay toolbar and text annotations styling
-├── newtab/                  # Infinite Canvas
-│   ├── newtab.html          # Monospace text-first Omarchy HUD & statusbar
-│   ├── newtab.css           # Rice theme, statusbar tags, text input styles
-│   ├── newtab.js            # Pan/zoom math, tools, history, keymap registry
-│   ├── exporters.js         # Vector SVG, React TSX, PDF writer, clipboard, project JSON
-│   └── tutorial.js          # Interactive 7-step guided tour
-├── options/                 # Keymap remapping interface
-│   ├── options.html
-│   ├── options.css
-│   └── options.js
-└── popup/                   # Extension popup status and shortcuts reference
-```
-
-- **Coordinates**: On-page overlay uses viewport-anchored CSS pixels. Infinite canvas uses world-space coordinates with seamless pan/zoom transformation.
-- **Intelligence Engine**: Fast, deterministic geometric analysis running under 2ms per stroke without heavy machine learning models.
-- **PDF Export**: Hand-rolled single-page PDF generator wrapping high-res JPEG XObject with verified xref byte offsets. Zero external libraries.
-- **SVG Export**: Pure vector paths, lines, rectangles, ellipses, and text elements.
-- **Project Files**: Portable, diffable `.lapboard` JSON files storing complete vector strokes and view offsets.
-
----
-
-## License
-
-MIT © 2026 Sachin — see [LICENSE](LICENSE).
+## 📄 License
+MIT © 2026 Sachin — see [LICENSE](LICENSE). Zero telemetry, zero external dependencies, 100% local.

@@ -116,6 +116,11 @@ $("#openCanvas").addEventListener("click", () => {
   window.close();
 });
 
+$("#openDocs").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("docs/docs.html") });
+  window.close();
+});
+
 $("#openTutorial").addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("tutorial/tutorial.html") });
   window.close();

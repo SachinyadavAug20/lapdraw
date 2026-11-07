@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LapDraw — Visual Documentation &amp; Feature Showcase</title>
+    <link rel="stylesheet" href="docs.css" />
+  </head>
+  <body>
+    <!-- Top Sticky Bar -->
+    <header class="docs-header">
+      <div class="header-brand">
+        <span class="logo">▞▚</span>
+        <span class="brand-text">LAPDRAW</span>
+        <span class="docs-badge">VISUAL DOCS</span>
+      </div>
+      <nav class="nav-pills">
+        <a href="#quickshape" class="pill active">🖐️ QuickShape</a>
+        <a href="#github-pr" class="pill">🔍 GitHub PR</a>
+        <a href="#docs-notes" class="pill">📖 Doc Notes</a>
+        <a href="#tools" class="pill">🛠️ All Tools</a>
+        <a href="#diagrams" class="pill">⚡ Diagrams</a>
+        <a href="#themes" class="pill">🎨 Themes</a>
+        <a href="#shortcuts" class="pill">⌨️ Keys</a>
+      </nav>
+      <div class="header-cta">
+        <button id="btnOpenCanvas" class="btn-primary">∞ Open Canvas</button>
+      </div>
+    </header>
+
+    <main class="docs-container">
+      <!-- Hero: Visual Overview -->
+      <section class="hero-card">
+        <div class="hero-left">
+          <div class="hero-tag">LAPTOP TRACKPAD FIRST · ZERO DEPENDENCIES</div>
+          <h1>Visual Documentation</h1>
+          <p class="hero-lead">
+            Everything you can do with LapDraw — in diagrams, screenshots, and visual examples. Minimal reading, instant clarity.
+          </p>
+          <div class="hero-stat-row">
+            <div class="stat-box">
+              <span class="stat-num">450ms</span>
+              <span class="stat-lbl">Hold-to-Snap</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">8</span>
+              <span class="stat-lbl">Developer Themes</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">7</span>
+              <span class="stat-lbl">Review Badges</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">0</span>
+              <span class="stat-lbl">Dependencies</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="screenshot-frame">
+            <div class="frame-bar">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+              <span class="frame-title">On-Page Drawing Overlay</span>
+            </div>
+            <img src="assets/on-page-annotation.png" alt="LapDraw On-Page Annotation Screenshot" class="frame-img" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. QuickShape: Hold-to-Snap Illustration -->
+      <section class="visual-section" id="quickshape">
+        <div class="section-title-row">
+          <span class="sec-num">01</span>
+          <h2>QuickShape: How Trackpad Hold-to-Snap Works</h2>
+        </div>
+
+        <div class="flow-banner">
+          <div class="flow-step">
+            <div class="step-icon">✏️</div>
+            <div class="step-title">1. Draw Roughly</div>
+            <div class="step-desc">Wobbly box, circle, line or arrow with your trackpad</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step highlight">
+            <div class="step-icon">⏱️</div>
+            <div class="step-title">2. Hold for 450ms</div>
+            <div class="step-desc">Pause finger still without lifting off trackpad</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step success">
+            <div class="step-icon">✨</div>
+            <div class="step-title">3. Snaps to Vector!</div>
+            <div class="step-desc">Instantly cleans up into perfect geometry</div>
+          </div>
+        </div>
+
+        <div class="compare-grid">
+          <div class="compare-card before">
+            <div class="compare-tag">WITHOUT QUICKSHAPE</div>
+            <div class="svg-demo">
+              <svg viewBox="0 0 200 120" class="demo-svg">
+                <path d="M 30,30 Q 35,28 70,33 Q 110,29 160,32 Q 163,50 162,85 Q 160,88 120,86 Q 70,89 28,84 Q 32,55 30,30" fill="none" stroke="#ff4757" stroke-width="2.5" stroke-dasharray="2,2"/>
+                <text x="100" y="65" text-anchor="middle" fill="#ff4757" font-size="11" font-family="monospace">Wobbly trackpad box</text>
+              </svg>
+            </div>
+            <div class="compare-caption">Friction jitter &amp; unsteady finger movements</div>
+          </div>
+
+          <div class="compare-card after">
+            <div class="compare-tag green">WITH QUICKSHAPE (HOLD 450ms)</div>
+            <div class="svg-demo">
+              <svg viewBox="0 0 200 120" class="demo-svg">
+                <rect x="25" y="25" width="150" height="70" rx="4" fill="rgba(46, 213, 115, 0.08)" stroke="#2ed573" stroke-width="2"/>
+                <text x="100" y="65" text-anchor="middle" fill="#2ed573" font-size="11" font-family="monospace" font-weight="bold">✦ Perfect Vector Box</text>
+              </svg>
+            </div>
+            <div class="compare-caption">Automatically recognized, smoothed &amp; aligned</div>
+          </div>
+        </div>
+
+        <!-- Interactive QuickShape Test Pad -->
+        <div class="interactive-card">
+          <div class="interactive-head">
+            <span>🎮 LIVE INTERACTIVE TEST PAD — Try holding still at the end of a stroke:</span>
+            <button id="qsClear" class="btn-micro">Clear</button>
+          </div>
+          <canvas id="qsDemoCanvas" width="860" height="180"></canvas>
+          <div class="interactive-status" id="qsDemoStatus">Draw any line, box or circle and pause for 450ms…</div>
+        </div>
+      </section>
+
+      <!-- 2. GitHub PR Review Mode -->
+      <section class="visual-section" id="github-pr">
+        <div class="section-title-row">
+          <span class="sec-num">02</span>
+          <h2>GitHub PR Review Mode: 3-Step Visual Code Review</h2>
+        </div>
+
+        <div class="feature-strip">
+          <div class="strip-item">
+            <div class="strip-num">STEP 1</div>
+            <div class="strip-title">Highlight Code (<kbd>H</kbd>)</div>
+            <p>Semitransparent highlighter (`HL`) draws clean bands over lines of code without obscuring syntax or line numbers.</p>
+          </div>
+          <div class="strip-item">
+            <div class="strip-num">STEP 2</div>
+            <div class="strip-title">Stamp Badges (<kbd>K</kbd>)</div>
+            <p>Click anywhere to place developer review stamps: `[BUG]`, `[SECURITY]`, `[LGTM]`, `[NIT]`, `[REQ CHANGES]`.</p>
+          </div>
+          <div class="strip-item">
+            <div class="strip-num">STEP 3</div>
+            <div class="strip-title">1-Click Copy (<kbd>G</kbd>)</div>
+            <p>Click `GH-PR` to copy composite screenshot to clipboard + structured PR Markdown review template.</p>
+          </div>
+        </div>
+
+        <!-- Stamp Badges Illustration -->
+        <div class="stamps-visual-bar">
+          <div class="stamp-chip s-green"><span class="icon">✓</span> [LGTM] Looks good</div>
+          <div class="stamp-chip s-red"><span class="icon">✖</span> [BUG] Crash / Error</div>
+          <div class="stamp-chip s-purple"><span class="icon">🔒</span> [SECURITY] Vulnerability</div>
+          <div class="stamp-chip s-yellow"><span class="icon">✎</span> [NIT] Style / Formatting</div>
+          <div class="stamp-chip s-orange"><span class="icon">⚠</span> [REQ] Changes needed</div>
+          <div class="stamp-chip s-cyan"><span class="icon">⚡</span> [PERF] Bottleneck</div>
+          <div class="stamp-chip s-blue"><span class="icon">?</span> [QUESTION] Clarify</div>
+        </div>
+
+        <!-- Code Diff Simulation Preview -->
+        <div class="visual-diff-preview">
+          <div class="diff-title-bar">
+            <span>📄 pkg/auth/session.go</span>
+            <span class="diff-badge">+6 -2</span>
+          </div>
+          <div class="diff-lines">
+            <div class="diff-line"><span class="ln">41</span><span class="txt">func ValidateSession(r *http.Request) (*User, error) {</span></div>
+            <div class="diff-line del"><span class="ln">42</span><span class="txt">-   token := r.Header.Get("X-Auth-Token")</span></div>
+            <div class="diff-line add highlighted"><span class="ln">43</span><span class="txt">+   token := strings.TrimSpace(r.Header.Get("Authorization"))</span><span class="stamp-badge red">✖ [BUG] Missing Bearer prefix check</span></div>
+            <div class="diff-line add spotlight"><span class="ln">44</span><span class="txt">+   claims, err := parseJWT(token)</span><span class="stamp-badge purple">🔒 [SECURITY] Reject 'none' algorithm</span></div>
+            <div class="diff-line add"><span class="ln">45</span><span class="txt">+   if err != nil { return nil, ErrInvalidToken }</span></div>
+            <div class="diff-line"><span class="ln">46</span><span class="txt">    return claims.User, nil</span></div>
+            <div class="diff-line"><span class="ln">47</span><span class="txt">}</span><span class="stamp-badge green">✓ [LGTM] Clean error return</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Documentation & PDF Notebook -->
+      <section class="visual-section" id="docs-notes">
+        <div class="section-title-row">
+          <span class="sec-num">03</span>
+          <h2>Persistent Documentation &amp; PDF Notebook (<kbd>N</kbd>)</h2>
+        </div>
+
+        <div class="notebook-visual-grid">
+          <div class="notebook-card">
+            <div class="nb-icon">🌐</div>
+            <h3>Per-URL Local Storage</h3>
+            <p>Notes are automatically tied to the webpage or PDF URL. Revisit any page on MDN, React.dev, or local PDF months later — notes restore automatically!</p>
+          </div>
+          <div class="notebook-card">
+            <div class="nb-icon">🏷️</div>
+            <h3>1-Click Semantic Tags</h3>
+            <p>Insert Markdown tags instantly: <code class="tag-code">+ [TODO]</code>, <code class="tag-code">+ [KEY POINT]</code>, <code class="tag-code">+ [API REF]</code>, <code class="tag-code">+ [BUG]</code>.</p>
+          </div>
+          <div class="notebook-card">
+            <div class="nb-icon">📸</div>
+            <h3>Snapshots &amp; Export</h3>
+            <p>Attach drawing screenshots into notes. 1-click <b>Copy MD</b> or <b>Export .md</b> file for Obsidian, Notion, or Logseq.</p>
+          </div>
+        </div>
+
+        <div class="doc-notes-mockup">
+          <div class="mockup-header">
+            <span class="m-icon">📖</span>
+            <span class="m-title">DOCS &amp; PDF NOTEBOOK</span>
+            <span class="m-url">https://react.dev/reference/react/useEffect</span>
+            <span class="m-saved">● Saved</span>
+          </div>
+          <div class="mockup-body">
+            <pre># useEffect Reference Notes
+> Saved: 2026-11-07 14:15 · React Documentation
+
+- [ ] [TODO] Audit cleanup functions in DataFeed listener
+> 🔑 **[KEY POINT]**: Cleanup runs before the effect runs next time and on unmount
+### 🔌 API: useEffect(setup, dependencies?)
+📸 Snapshot: Attached component lifecycle diagram</pre>
+          </div>
+          <div class="mockup-foot">
+            <span class="foot-btn">📸 Snap</span>
+            <span class="foot-btn">📋 Copy MD</span>
+            <span class="foot-btn">💾 Export .md</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Every Tool Illustrated -->
+      <section class="visual-section" id="tools">
+        <div class="section-title-row">
+          <span class="sec-num">04</span>
+          <h2>Every Tool Illustrated at a Glance</h2>
+        </div>
+
+        <div class="tools-grid">
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>P</kbd> PEN</div>
+            <h4>Streamline Pen</h4>
+            <p>Freehand drawing with quadratic spline interpolation. Hold still 450ms to snap geometry.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>H</kbd> HL</div>
+            <h4>Highlighter</h4>
+            <p>Translucent yellow/coral highlighter bands for code diffs and documentation text.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>E</kbd> ERS</div>
+            <h4>Eraser</h4>
+            <p>Smoothly removes vector strokes or masks background drawing.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>L</kbd> LIN</div>
+            <h4>Straight Line</h4>
+            <p>Draws straight lines. Hold <kbd>Shift</kbd> for 45° angle snapping.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>R</kbd> BOX</div>
+            <h4>Box / Rectangle</h4>
+            <p>Draws architecture containers. Hold <kbd>Shift</kbd> for perfect squares.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>A</kbd> ARR</div>
+            <h4>Connector Arrow</h4>
+            <p>Draws directional message flow arrows with solid filled arrowheads.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>T</kbd> TXT</div>
+            <h4>Monospace Text</h4>
+            <p>Click-to-type labels, code blocks, and tags in JetBrains Mono font.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>F</kbd> SPOT</div>
+            <h4>Diff Spotlight</h4>
+            <p>Draws a focus box around code diffs, dimming the rest of the page.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>K</kbd> STAMP</div>
+            <h4>Review Stamps</h4>
+            <p>Stamps [LGTM], [BUG], [SECURITY], [NIT] badges with inline comment cards.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>N</kbd> NOTES</div>
+            <h4>Doc Notebook</h4>
+            <p>Per-URL persistent notes drawer with 1-click Markdown export.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>D</kbd> DIAG</div>
+            <h4>Diagram Studio</h4>
+            <p>Generates Sequence flows, UML Classes, and DB Relational Tables.</p>
+          </div>
+          <div class="tool-card">
+            <div class="tool-badge"><kbd>☩</kbd> RADAR</div>
+            <h4>Radar Minimap</h4>
+            <p>Real-time overview radar in bottom-right corner with click-to-pan.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Architecture & Sequence Studio -->
+      <section class="visual-section" id="diagrams">
+        <div class="section-title-row">
+          <span class="sec-num">05</span>
+          <h2>Architecture &amp; Sequence Studio (<kbd>D</kbd>)</h2>
+        </div>
+
+        <div class="diagram-types-grid">
+          <!-- Sequence Diagram Card -->
+          <div class="diag-card">
+            <div class="diag-header">
+              <span class="d-title">⚡ Sequence Diagram Studio</span>
+              <span class="d-tag">1-CLICK</span>
+            </div>
+            <div class="diag-body">
+              <div class="feature-bullets">
+                <div>✔ <b>Execution Activations</b>: Vertical bars indicating active CPU processing</div>
+                <div>✔ <b>Combined Frames</b>: <code class="tag-code">alt / else</code> conditions, <code class="tag-code">loop</code> intervals</div>
+                <div>✔ <b>Self-Call Loops</b>: 3-segment orthogonal loopbacks</div>
+              </div>
+              <div class="mini-diagram-preview">
+                <div class="d-lifelines">
+                  <span class="ll">Client</span>
+                  <span class="ll">API Gateway</span>
+                  <span class="ll">AuthService</span>
+                  <span class="ll">Database</span>
+                </div>
+                <div class="d-arrows">
+                  <div class="arr-row"><span>Client ➔ Gateway: POST /api/login</span></div>
+                  <div class="arr-row"><span>Gateway ➔ AuthService: Validate(creds)</span></div>
+                  <div class="arr-row"><span>AuthService ➔ Database: SELECT * FROM users</span></div>
+                  <div class="arr-row alt"><span>[alt: Valid Credentials] ➔ 200 OK + JWT</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UML Class & DB Schema Card -->
+          <div class="diag-card">
+            <div class="diag-header">
+              <span class="d-title">🏛 UML Classes &amp; DB Schemas</span>
+              <span class="d-tag">VECTOR</span>
+            </div>
+            <div class="diag-body">
+              <div class="feature-bullets">
+                <div>✔ <b>Stereotypes</b>: <code class="tag-code">«service»</code>, <code class="tag-code">«interface»</code>, <code class="tag-code">«entity»</code></div>
+                <div>✔ <b>Visibility</b>: Colored <span style="color:#2ed573">+public</span>, <span style="color:#ff4757">-private</span>, <span style="color:#ffa502">#protected</span></div>
+                <div>✔ <b>6 Connectors</b>: Inheritance (<code class="tag-code">&lt;|--</code>), Composition (<code class="tag-code">*--</code>), Dependency (<code class="tag-code">..&gt;</code>)</div>
+              </div>
+              <div class="uml-preview-box">
+                <div class="uml-box-header">«service» <b>AuthManager</b></div>
+                <div class="uml-box-section">- jwtSecret: string<br/>- tokenTTL: Duration = 3600s</div>
+                <div class="uml-box-section methods">+ issueToken(user: User): string<br/>+ verifyClaims(raw: string): Claims</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Developer Themes Gallery -->
+      <section class="visual-section" id="themes">
+        <div class="section-title-row">
+          <span class="sec-num">06</span>
+          <h2>8 Developer Themes (<kbd>THM</kbd>)</h2>
+        </div>
+
+        <p class="theme-intro">Click any theme to inspect its color palette and terminal aesthetic:</p>
+
+        <div class="themes-grid">
+          <div class="theme-card active" data-thm="omarchy">
+            <div class="theme-swatch" style="background:#0e1114; border-top: 3px solid #ff5c50;">
+              <span class="dot" style="background:#ff5c50"></span>
+              <span class="dot" style="background:#64a8ff"></span>
+              <span class="dot" style="background:#74c69d"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Omarchy Rice</span>
+              <span class="t-tag">DEFAULT</span>
+            </div>
+            <p class="t-desc">Dark terminal mono rice with coral accents</p>
+          </div>
+
+          <div class="theme-card" data-thm="dracula">
+            <div class="theme-swatch" style="background:#282a36; border-top: 3px solid #bd93f9;">
+              <span class="dot" style="background:#bd93f9"></span>
+              <span class="dot" style="background:#ff79c6"></span>
+              <span class="dot" style="background:#50fa7b"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Dracula</span>
+            </div>
+            <p class="t-desc">Classic vampire purple &amp; neon pink</p>
+          </div>
+
+          <div class="theme-card" data-thm="catppuccin">
+            <div class="theme-swatch" style="background:#1e1e2e; border-top: 3px solid #cba6f7;">
+              <span class="dot" style="background:#cba6f7"></span>
+              <span class="dot" style="background:#89b4fa"></span>
+              <span class="dot" style="background:#a6e3a1"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Catppuccin</span>
+            </div>
+            <p class="t-desc">Soothing pastel dark mocha</p>
+          </div>
+
+          <div class="theme-card" data-thm="tokyo">
+            <div class="theme-swatch" style="background:#1a1b26; border-top: 3px solid #7aa2f7;">
+              <span class="dot" style="background:#7aa2f7"></span>
+              <span class="dot" style="background:#7dcfff"></span>
+              <span class="dot" style="background:#9ece6a"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Tokyo Night</span>
+            </div>
+            <p class="t-desc">Clean neon cyberpunk metropolis</p>
+          </div>
+
+          <div class="theme-card" data-thm="nord">
+            <div class="theme-swatch" style="background:#2e3440; border-top: 3px solid #88c0d0;">
+              <span class="dot" style="background:#88c0d0"></span>
+              <span class="dot" style="background:#81a1c1"></span>
+              <span class="dot" style="background:#a3be8c"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Nord Frost</span>
+            </div>
+            <p class="t-desc">Arctic bluish elegance &amp; soft contrast</p>
+          </div>
+
+          <div class="theme-card" data-thm="monokai">
+            <div class="theme-swatch" style="background:#2d2a2e; border-top: 3px solid #ffd866;">
+              <span class="dot" style="background:#ffd866"></span>
+              <span class="dot" style="background:#ff6188"></span>
+              <span class="dot" style="background:#a9dc76"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Monokai Pro</span>
+            </div>
+            <p class="t-desc">Vibrant code syntax palette</p>
+          </div>
+
+          <div class="theme-card" data-thm="paper">
+            <div class="theme-swatch" style="background:#f6f8fa; border-top: 3px solid #0969da;">
+              <span class="dot" style="background:#0969da"></span>
+              <span class="dot" style="background:#1a7f37"></span>
+              <span class="dot" style="background:#cf222e"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name" style="color:#0969da">Paper Light</span>
+            </div>
+            <p class="t-desc">Clean GitHub white for daylight &amp; printing</p>
+          </div>
+
+          <div class="theme-card" data-thm="matrix">
+            <div class="theme-swatch" style="background:#080c0e; border-top: 3px solid #00ff88;">
+              <span class="dot" style="background:#00ff88"></span>
+              <span class="dot" style="background:#00e5ff"></span>
+              <span class="dot" style="background:#39ff14"></span>
+            </div>
+            <div class="theme-meta">
+              <span class="t-name">Matrix Cyber</span>
+            </div>
+            <p class="t-desc">Green phosphor hacker glow</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Keyboard Shortcuts Quick Card -->
+      <section class="visual-section" id="shortcuts">
+        <div class="section-title-row">
+          <span class="sec-num">07</span>
+          <h2>Keyboard Shortcuts Quick Reference</h2>
+        </div>
+
+        <div class="shortcuts-card-grid">
+          <div class="sc-card">
+            <div class="sc-header">GLOBAL SHORTCUTS</div>
+            <div class="sc-row"><kbd>Alt+Shift+D</kbd> <span>Toggle on-page drawing</span></div>
+            <div class="sc-row"><kbd>Alt+Shift+E</kbd> <span>Switch Pen ↔ Eraser</span></div>
+            <div class="sc-row"><kbd>Alt+Shift+C</kbd> <span>Open infinite canvas tab</span></div>
+            <div class="sc-row"><kbd>Alt+Shift+Z</kbd> <span>Undo last stroke</span></div>
+          </div>
+
+          <div class="sc-card">
+            <div class="sc-header">ON-PAGE REVIEW TOOLS</div>
+            <div class="sc-row"><kbd>H</kbd> <span>Highlighter band</span></div>
+            <div class="sc-row"><kbd>K</kbd> <span>Review stamps menu</span></div>
+            <div class="sc-row"><kbd>F</kbd> <span>Diff spotlight focus</span></div>
+            <div class="sc-row"><kbd>N</kbd> <span>Doc &amp; PDF notes drawer</span></div>
+            <div class="sc-row"><kbd>G</kbd> <span>Copy for GitHub PR</span></div>
+          </div>
+
+          <div class="sc-card">
+            <div class="sc-header">CANVAS DIAGRAM TOOLS</div>
+            <div class="sc-row"><kbd>D</kbd> <span>Open Diagram Builder</span></div>
+            <div class="sc-row"><kbd>M</kbd> <span>Smart Shape Assist</span></div>
+            <div class="sc-row"><kbd>G</kbd> <span>Grid snap (16px)</span></div>
+            <div class="sc-row"><kbd>K</kbd> <span>Dashed stroke style</span></div>
+            <div class="sc-row"><kbd>0</kbd> <span>Fit all content</span></div>
+            <div class="sc-row"><kbd>Tab</kbd> <span>Zen mode (hide toolbar)</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="docs-footer">
+      <div>LapDraw — Trackpad-First Developer Architecture &amp; Annotation Suite</div>
+      <div class="foot-links">
+        <a href="https://github.com/SachinyadavAug20/lapdraw" target="_blank">GitHub</a> · 
+        <a href="../newtab/newtab.html">Infinite Canvas</a> · 
+        <a href="../options/options.html">Configure Keys</a> · 
+        <a href="../tutorial/tutorial.html">Interactive Lab</a>
+      </div>
+    </footer>
+
+    <script src="../shared/intelligence.js"></script>
+    <script src="docs.js"></script>
+  </body>
+</html>
