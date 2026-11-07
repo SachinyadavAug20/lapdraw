@@ -44,8 +44,11 @@ It ships as a **zero-dependency**, local WebExtension (MV3 for Chrome, MV2 for F
 ## Highlights
 
 - ✍️ **Draw on Any Website** — overlay canvas above any page for code reviews, bug reports, and demos
+- 🔍 **GitHub PR Review Mode & Badges** — translucent highlighter (`HL`), diff line spotlight (`SPOT`), review stamps (`[LGTM]`, `[BUG]`, `[SECURITY]`, `[NIT]`, `[REQ CHANGES]`, `[PERF]`, `[QUESTION]`), and 1-click "Copy for GitHub PR"
+- 📖 **Persistent Docs & PDF Notebook** — floating notebook panel (`NOTES`) auto-saved per URL in `chrome.storage.local` with 1-click Markdown export for Obsidian, Notion, and Logseq
+- 🎓 **Interactive In-App Developer Lab & Tutorial** — hands-on interactive playground (`tutorial/tutorial.html`) with live sandboxes for QuickShape, GitHub code diffs, and live DSL compiling
 - 🗺 **Infinite Canvas** — new-tab whiteboard with pan, zoom, grid, and local auto-save
-- 🧠 **QuickShape Intelligence** — hold still for 450ms at the end of a stroke to snap lines, boxes, circles, and arrows
+- 🧠 **QuickShape Intelligence** — hold still for 450ms at the end of a stroke to snap lines, boxes, circles, diamonds, cylinders, and arrows
 - 🧯 **Trackpad Streamline Stabilizer** — exponential moving-average filter removes friction stutter
 - 🎣 **Fishhook Trimmer** — removes directional hook artifacts when lifting your finger
 - 🎨 **8 Developer Themes (THM)** — Omarchy Rice, Dracula, Catppuccin Mocha, Tokyo Night, Nord Frost, Monokai Pro, Paper Light, Matrix Cyber with dynamic HUD palettes
@@ -69,6 +72,7 @@ It ships as a **zero-dependency**, local WebExtension (MV3 for Chrome, MV2 for F
 - 📦 **Developer Export Suite** — Copy SVG markup, Copy React component (`.tsx`), Copy Mermaid.js code (`mermaid`), Copy Markdown embed, PNG, JPG, PDF, `.lapboard` project JSON
 - ⌨️ **Configurable Shortcuts** — remap every key in the options page
 - 🌓 **Omarchy Rice & Monospace Fonts** — dark terminal aesthetic, JetBrains Mono font, vim-flavored statusbar
+- 📚 **Comprehensive Guides**: [Developer Guide](docs/DEVELOPER_GUIDE.md) · [GitHub Reviews & Docs Notes](docs/GITHUB_AND_DOCS_NOTES.md)
 
 ---
 

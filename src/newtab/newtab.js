@@ -1336,6 +1336,14 @@ document.getElementById("replayTutorial").addEventListener("click", () => {
   window.lapdrawTutorial && window.lapdrawTutorial.start();
 });
 
+const openTutHandler = () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("tutorial/tutorial.html") });
+};
+const openTutBtn = document.getElementById("openTutorialTab");
+if (openTutBtn) openTutBtn.addEventListener("click", openTutHandler);
+const openFullTutBtn = document.getElementById("openFullTutorial");
+if (openFullTutBtn) openFullTutBtn.addEventListener("click", openTutHandler);
+
 // ----- Developer Diagram Builder Modal -----
 const diagModal = document.getElementById("diagModal");
 const openDiagBtn = document.getElementById("openDiagModal");

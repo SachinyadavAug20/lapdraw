@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LapDraw — Developer Tutorial &amp; Interactive Lab</title>
+    <link rel="stylesheet" href="tutorial.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="lab-nav">
+      <div class="nav-left">
+        <span class="logo">▞▚</span>
+        <span class="brand-title">LAPDRAW</span>
+        <span class="badge">DEVELOPER LAB &amp; DOCS</span>
+      </div>
+      <div class="nav-links">
+        <a href="#lesson-quickshape" class="nav-link active">1. QuickShape</a>
+        <a href="#lesson-github" class="nav-link">2. GitHub PR Review</a>
+        <a href="#lesson-docs" class="nav-link">3. Doc Notes</a>
+        <a href="#lesson-sequence" class="nav-link">4. Sequence Studio</a>
+        <a href="#lesson-uml" class="nav-link">5. UML &amp; DB</a>
+        <a href="#lesson-dsl" class="nav-link">6. Live DSL</a>
+        <a href="#lesson-cheatsheet" class="nav-link">7. Cheatsheet</a>
+      </div>
+      <div class="nav-right">
+        <button id="openCanvasBtn" class="primary-btn">Open Infinite Canvas</button>
+      </div>
+    </header>
+
+    <main class="lab-main">
+      <!-- Hero Header -->
+      <section class="hero-section">
+        <div class="hero-tag">LAPTOP TRACKPAD FIRST · ZERO DEPENDENCIES · STORE READY</div>
+        <h1 class="hero-title">Developer Drawing &amp; Architecture Lab</h1>
+        <p class="hero-subtitle">
+          Designed specifically for engineers without a pen or mouse. Master hold-to-snap QuickShapes, review code diffs on GitHub, take persistent Markdown notes on documentation and PDFs, and build system architecture diagrams in seconds.
+        </p>
+      </section>
+
+      <!-- Lesson 1: Trackpad QuickShape -->
+      <section class="lesson-card" id="lesson-quickshape">
+        <div class="lesson-header">
+          <span class="lesson-num">01</span>
+          <div>
+            <h2>Trackpad QuickShape &amp; Streamline Smoothing</h2>
+            <p class="lesson-desc">
+              Drawing with a trackpad normally produces jagged lines and wobbly boxes. LapDraw solves this with <b>sub-pixel streamline smoothing</b>, <b>fishhook tail stripping</b>, and <b>QuickShape hold-to-snap</b>.
+            </p>
+          </div>
+        </div>
+
+        <div class="interactive-box">
+          <div class="box-instructions">
+            <span class="step-badge">TRY IT NOW</span>
+            Draw any rough line, circle, rectangle, or arrow with your trackpad and <b>hold still for 450ms</b> at the end of the stroke. Watch it snap to clean geometry!
+          </div>
+
+          <div class="canvas-container" id="quickshapeContainer">
+            <canvas id="quickshapeCanvas" width="800" height="260"></canvas>
+            <div class="canvas-controls">
+              <button class="mini-btn active" id="qsPenBtn">Pen</button>
+              <button class="mini-btn" id="qsEraserBtn">Eraser</button>
+              <button class="mini-btn" id="qsClearBtn">Clear</button>
+              <span class="status-indicator" id="qsStatus">Draw and hold to snap…</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tech-specs-grid">
+          <div class="spec-card">
+            <h4>Catmull-Rom Streamline</h4>
+            <p>Computes quadratic Bezier control points across 3-sample sliding windows mid-air, removing trackpad micro-jitter without sluggish input lag.</p>
+          </div>
+          <div class="spec-card">
+            <h4>Fishhook Stripping</h4>
+            <p>Trackpad lift-off often produces accidental tail hooks. LapDraw detects sudden angle reversals in the final 12% of the trajectory and strips them cleanly.</p>
+          </div>
+          <div class="spec-card">
+            <h4>Geometric Shape Snapping</h4>
+            <p>Holding still for 450ms calculates bounding aspect ratios, radial standard deviation, and vertex angles to snap to perfect Lines, Boxes, Circles, Diamonds, or Cylinders.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson 2: GitHub PR Review Mode -->
+      <section class="lesson-card" id="lesson-github">
+        <div class="lesson-header">
+          <span class="lesson-num">02</span>
+          <div>
+            <h2>GitHub PR Review Mode &amp; Code Diff Auditing</h2>
+            <p class="lesson-desc">
+              When reviewing code on GitHub, Gitlab, or Bitbucket, use LapDraw to highlight diff lines, stamp review badges (<code class="code-tag">[LGTM]</code>, <code class="code-tag">[BUG]</code>, <code class="code-tag">[SECURITY]</code>), focus reviewers with diff spotlight, and copy 1-click Markdown comments with composite screenshots.
+            </p>
+          </div>
+        </div>
+
+        <div class="interactive-box">
+          <div class="box-instructions">
+            <span class="step-badge">INTERACTIVE DIFF REVIEW</span>
+            Use the toolbar below to highlight the race condition on line 42 with <code class="code-tag">HL</code>, stamp a <code class="code-tag">[BUG]</code> badge, then click <b>Copy for GitHub PR</b>.
+          </div>
+
+          <div class="pr-review-sandbox">
+            <!-- Simulated Toolbar -->
+            <div class="pr-toolbar">
+              <button class="pr-btn active" id="prToolHl">HL (Highlighter)</button>
+              <button class="pr-btn" id="prToolStamp">STAMP: [BUG] ▾</button>
+              <button class="pr-btn" id="prToolSpot">SPOT (Focus)</button>
+              <button class="pr-btn" id="prToolPen">PEN</button>
+              <button class="pr-btn" id="prToolClear">Clear</button>
+              <div class="pr-sep"></div>
+              <button class="pr-btn primary" id="prCopyGhBtn">📋 Copy for GitHub PR</button>
+            </div>
+
+            <!-- Simulated GitHub Diff with Canvas Overlay -->
+            <div class="diff-viewport">
+              <div class="diff-header">
+                <span class="diff-icon">📄</span>
+                <span class="diff-file">internal/auth/jwt_validator.go</span>
+                <span class="diff-stat">+14 -3</span>
+              </div>
+              <div class="diff-code-wrapper" id="diffCodeWrapper">
+                <table class="diff-table">
+                  <tr><td class="ln">38</td><td class="sign"> </td><td class="code">func VerifyToken(tokenString string) (*Claims, error) {</td></tr>
+                  <tr><td class="ln">39</td><td class="sign"> </td><td class="code">&nbsp;&nbsp;&nbsp;&nbsp;token, err := jwt.Parse(tokenString, keyFunc)</td></tr>
+                  <tr><td class="ln">40</td><td class="sign">-</td><td class="code del">&nbsp;&nbsp;&nbsp;&nbsp;if err != nil { return nil, err }</td></tr>
+                  <tr><td class="ln">41</td><td class="sign">+</td><td class="code add">&nbsp;&nbsp;&nbsp;&nbsp;// SECURITY RISK: missing claims expiration check</td></tr>
+                  <tr><td class="ln">42</td><td class="sign">+</td><td class="code add">&nbsp;&nbsp;&nbsp;&nbsp;claims := token.Claims.(*Claims)</td></tr>
+                  <tr><td class="ln">43</td><td class="sign">+</td><td class="code add">&nbsp;&nbsp;&nbsp;&nbsp;if !claims.VerifyExpiresAt(time.Now().Unix(), true) {</td></tr>
+                  <tr><td class="ln">44</td><td class="sign">+</td><td class="code add">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return nil, ErrExpiredToken</td></tr>
+                  <tr><td class="ln">45</td><td class="sign"> </td><td class="code">&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
+                  <tr><td class="ln">46</td><td class="sign"> </td><td class="code">&nbsp;&nbsp;&nbsp;&nbsp;return claims, nil</td></tr>
+                  <tr><td class="ln">47</td><td class="sign"> </td><td class="code">}</td></tr>
+                </table>
+                <canvas id="prReviewCanvas" class="diff-overlay-canvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Live Generated GitHub PR Markdown preview -->
+            <div class="pr-output-preview">
+              <div class="preview-header">
+                <span>GENERATED GITHUB PR COMMENT MARKDOWN</span>
+                <span class="badge" id="prCopyStatus">Click "Copy for GitHub PR" above</span>
+              </div>
+              <pre class="pr-markdown" id="prMarkdownOutput">### 🔍 LapDraw Code Review
+> **Target**: `internal/auth/jwt_validator.go`
+> *(Annotated screenshot copied to clipboard — press Ctrl+V to paste image into GitHub)*
+
+#### 📌 Review Callouts:
+- ✖ **[BUG]**: Line 42: Validate claims pointer before type assertion to avoid panic
+- 🔒 **[SECURITY]**: Ensure keyFunc rejects 'none' algorithm header
+
+---
+*Reviewed with LapDraw*</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson 3: Documentation & PDF Notes -->
+      <section class="lesson-card" id="lesson-docs">
+        <div class="lesson-header">
+          <span class="lesson-num">03</span>
+          <div>
+            <h2>Persistent Documentation &amp; PDF Notebook</h2>
+            <p class="lesson-desc">
+              Reading whitepapers, API references (MDN, React, Rust docs), or local PDFs? LapDraw automatically saves notes scoped to each URL in Chrome/Firefox local storage.
+            </p>
+          </div>
+        </div>
+
+        <div class="interactive-box">
+          <div class="box-instructions">
+            <span class="step-badge">LIVE SIMULATION</span>
+            Type notes below, click the quick tag buttons (<code class="code-tag">+ [TODO]</code>, <code class="code-tag">+ [KEY POINT]</code>), and test exporting to Markdown.
+          </div>
+
+          <div class="doc-notes-sandbox">
+            <!-- Simulated Doc Reader -->
+            <div class="doc-reader">
+              <div class="doc-title-bar">
+                <span class="doc-icon">📖</span>
+                <span>Distributed Consensus · Raft Protocol Whitepaper</span>
+              </div>
+              <div class="doc-body">
+                <h3>5.2 Leader Election</h3>
+                <p>
+                  Raft uses a heartbeat mechanism to trigger leader election. When servers start up, they begin as <em>followers</em>. A server remains in follower state as long as it receives valid RPCs from a leader or candidate. Leaders send periodic heartbeats (AppendEntries RPCs that carry no log entries) to all followers in order to maintain their authority.
+                </p>
+                <div class="doc-highlight-target">
+                  If a follower receives no communication over a period of time called the <strong>election timeout</strong>, then it assumes there is no viable leader and begins an election to choose a new leader.
+                </div>
+              </div>
+            </div>
+
+            <!-- Simulated LapDraw Notes Panel -->
+            <div class="sim-notes-panel">
+              <div class="sim-notes-head">
+                <span class="title">📖 DOC NOTES &amp; PDF NOTEBOOK</span>
+                <span class="status" id="simNotesStatus">Saved</span>
+              </div>
+              <div class="sim-notes-tags">
+                <button class="sim-tag-btn" data-insert="- [ ] [TODO] ">+ [TODO]</button>
+                <button class="sim-tag-btn" data-insert="> 🔑 **[KEY POINT]**: ">+ [KEY]</button>
+                <button class="sim-tag-btn" data-insert="### 🔌 API: ">+ [API]</button>
+                <button class="sim-tag-btn" data-insert="- 🐞 **[BUG]**: ">+ [BUG]</button>
+              </div>
+              <textarea id="simNotesArea" class="sim-notes-textarea"># Raft Consensus Notes
+> Source: raft-consensus-paper.pdf
+> Scope: Leader Election (Section 5.2)
+
+- [ ] [TODO] Implement election timeout randomized between 150ms-300ms
+> 🔑 **[KEY POINT]**: Heartbeats are empty AppendEntries RPCs</textarea>
+              <div class="sim-notes-foot">
+                <button class="sim-btn" id="simSnapBtn">📸 Snap</button>
+                <button class="sim-btn" id="simCopyBtn">📋 Copy MD</button>
+                <button class="sim-btn" id="simExportBtn">💾 Export .md</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson 4: Sequence Diagram Studio -->
+      <section class="lesson-card" id="lesson-sequence">
+        <div class="lesson-header">
+          <span class="lesson-num">04</span>
+          <div>
+            <h2>Sequence Diagrams with Activations &amp; Frames</h2>
+            <p class="lesson-desc">
+              Generate industrial-grade sequence diagrams in 1 click. Supports lifelines, execution activations, self-call message loops, and combined fragments (<code class="code-tag">alt</code>, <code class="code-tag">loop</code>, <code class="code-tag">opt</code>).
+            </p>
+          </div>
+        </div>
+
+        <div class="seq-presets-tabs">
+          <button class="seq-tab active" data-seq="jwt">JWT Authentication</button>
+          <button class="seq-tab" data-seq="stripe">Stripe Checkout &amp; Webhooks</button>
+          <button class="seq-tab" data-seq="ws">WebSocket Handshake</button>
+          <button class="seq-tab" data-seq="cache">Cache-Aside Flow</button>
+        </div>
+
+        <div class="seq-preview-box">
+          <pre class="seq-code-display" id="seqCodeDisplay">
+participant Client
+participant Gateway
+participant AuthService
+participant Database
+
+Client -> Gateway: POST /api/v1/auth/login
+Gateway -> AuthService: ValidateCredentials(user, pass)
+AuthService -> Database: SELECT * FROM users WHERE email = ?
+Database --> AuthService: UserRecord
+alt Valid Password
+  AuthService --> Gateway: 200 OK + Signed JWT Token
+  Gateway --> Client: 200 Set-Cookie: jwt=token
+else Invalid Password
+  AuthService --> Gateway: 401 Unauthorized
+  Gateway --> Client: 401 Invalid Credentials
+end
+          </pre>
+          <div class="seq-actions">
+            <button class="primary-btn" id="copyMermaidSeqBtn">Copy as Mermaid.js</button>
+            <button class="secondary-btn" id="copyReactSeqBtn">Copy as React TSX</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson 5: UML Class & Architecture Studio -->
+      <section class="lesson-card" id="lesson-uml">
+        <div class="lesson-header">
+          <span class="lesson-num">05</span>
+          <div>
+            <h2>UML Class Modeling &amp; Database ERD Tables</h2>
+            <p class="lesson-desc">
+              Design microservice components and database schemas with stereotypes (<code class="code-tag">«service»</code>, <code class="code-tag">«interface»</code>), visibility prefixes (<code class="code-tag">+</code> public, <code class="code-tag">-</code> private), and relationship connectors (<code class="code-tag">&lt;|--</code> Inheritance, <code class="code-tag">*--</code> Composition, <code class="code-tag">--&gt;</code> Association).
+            </p>
+          </div>
+        </div>
+
+        <div class="uml-demo-grid">
+          <div class="uml-class-card">
+            <div class="uml-stereo">«service»</div>
+            <div class="uml-name">PaymentProcessor</div>
+            <div class="uml-section fields">
+              <div>- apiKey: string</div>
+              <div>- timeoutMs: int = 5000</div>
+              <div>- retryLimit: int = 3</div>
+            </div>
+            <div class="uml-section methods">
+              <div>+ charge(card: Card, amt: Decimal): Result</div>
+              <div>+ refund(txnId: UUID): boolean</div>
+              <div># verifyWebhook(sig: string): boolean</div>
+            </div>
+          </div>
+
+          <div class="uml-connector-guide">
+            <h4>6 Relationship Connectors</h4>
+            <div class="conn-item"><code>&lt;|--</code> <span>Inheritance / Generalization (Solid line + Hollow triangle)</span></div>
+            <div class="conn-item"><code>&lt;|..</code> <span>Implementation / Interface (Dashed line + Hollow triangle)</span></div>
+            <div class="conn-item"><code>*--</code> <span>Composition (Solid line + Filled diamond)</span></div>
+            <div class="conn-item"><code>o--</code> <span>Aggregation (Solid line + Hollow diamond)</span></div>
+            <div class="conn-item"><code>..&gt;</code> <span>Dependency (Dashed line + Open arrow)</span></div>
+            <div class="conn-item"><code>--&gt;</code> <span>Directed Association (Solid line + Open arrow)</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson 6: Live DSL & Markdown Compiler -->
+      <section class="lesson-card" id="lesson-dsl">
+        <div class="lesson-header">
+          <span class="lesson-num">06</span>
+          <div>
+            <h2>Live Markdown &amp; Architecture DSL Compiler</h2>
+            <p class="lesson-desc">
+              Don't want to draw manually? Type text into the DSL compiler and watch it parse into vector canvas strokes instantly.
+            </p>
+          </div>
+        </div>
+
+        <div class="dsl-compiler-box">
+          <div class="dsl-editor-pane">
+            <div class="pane-title">ARCHITECTURE DSL TEXT</div>
+            <textarea id="dslTextarea" class="dsl-textarea">participant Client
+participant APIGateway
+participant Cache
+participant Database
+
+Client -> APIGateway: GET /api/v1/orders
+APIGateway -> Cache: get(cache_key)
+alt Cache Hit
+  Cache --> APIGateway: cached_orders_json
+  APIGateway --> Client: 200 OK (from cache)
+else Cache Miss
+  APIGateway -> Database: SELECT * FROM orders WHERE user_id
+  Database --> APIGateway: records
+  APIGateway -> Cache: setex(cache_key, records, 300)
+  APIGateway --> Client: 200 OK (from db)
+end</textarea>
+            <button id="renderDslBtn" class="primary-btn">⚡ Re-compile to Preview</button>
+          </div>
+
+          <div class="dsl-preview-pane">
+            <div class="pane-title">LIVE RENDERED VECTOR STROKES</div>
+            <canvas id="dslPreviewCanvas" width="460" height="340"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson 7: Developer Cheatsheet -->
+      <section class="lesson-card" id="lesson-cheatsheet">
+        <div class="lesson-header">
+          <span class="lesson-num">07</span>
+          <div>
+            <h2>Developer Keyboard Cheatsheet &amp; Gestures</h2>
+            <p class="lesson-desc">
+              Every single shortcut is configurable in the options page (<kbd>LapDraw icon</kbd> → <kbd>⚙ KEYS</kbd>).
+            </p>
+          </div>
+        </div>
+
+        <div class="cheatsheet-table-wrapper">
+          <table class="keys-table">
+            <thead>
+              <tr><th>Action</th><th>Key</th><th>Context</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><b>Draw Mode Toggle</b></td><td><kbd>Alt+Shift+D</kbd></td><td>Global</td><td>Toggles on-page overlay drawing</td></tr>
+              <tr><td><b>Eraser Mode Toggle</b></td><td><kbd>Alt+Shift+E</kbd></td><td>Global</td><td>Switches between Pen and Eraser</td></tr>
+              <tr><td><b>Open Infinite Canvas</b></td><td><kbd>Alt+Shift+C</kbd></td><td>Global</td><td>Opens full infinite board tab</td></tr>
+              <tr><td><b>Pen Tool</b></td><td><kbd>P</kbd></td><td>Canvas / Overlay</td><td>Freehand drawing with streamline smoothing</td></tr>
+              <tr><td><b>Highlighter Tool</b></td><td><kbd>H</kbd></td><td>Overlay</td><td>Semitransparent highlighter band for code &amp; docs</td></tr>
+              <tr><td><b>Diff Spotlight</b></td><td><kbd>F</kbd></td><td>Overlay</td><td>Scrim focus box around code diffs</td></tr>
+              <tr><td><b>Review Stamps</b></td><td><kbd>K</kbd></td><td>Overlay</td><td>Places [LGTM], [BUG], [SECURITY], [NIT] badges</td></tr>
+              <tr><td><b>Doc Notes Panel</b></td><td><kbd>N</kbd></td><td>Overlay</td><td>Toggles per-URL persistent notes notebook</td></tr>
+              <tr><td><b>Copy for GitHub PR</b></td><td><kbd>G</kbd></td><td>Overlay</td><td>Copies annotated screenshot + formatted PR markdown</td></tr>
+              <tr><td><b>QuickShape Hold</b></td><td><kbd>Hold 450ms</kbd></td><td>Canvas / Overlay</td><td>Snaps hand-drawn lines, boxes, circles, arrows</td></tr>
+              <tr><td><b>Diagram Builder</b></td><td><kbd>D</kbd></td><td>Canvas</td><td>Opens Sequence, UML, and DB tables modal</td></tr>
+              <tr><td><b>Developer Themes</b></td><td><kbd>THM</kbd></td><td>Canvas</td><td>Omarchy, Dracula, Catppuccin, Tokyo, Nord, Monokai</td></tr>
+              <tr><td><b>Pan Canvas</b></td><td><kbd>Two-finger scroll</kbd></td><td>Canvas</td><td>Pans infinitely across x/y plane</td></tr>
+              <tr><td><b>Zoom In / Out</b></td><td><kbd>Pinch trackpad</kbd></td><td>Canvas</td><td>Zooms smoothly around cursor position</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lab-footer">
+      <div>LapDraw — Developer Architecture &amp; Annotation Suite</div>
+      <div class="footer-links">
+        <a href="https://github.com/SachinyadavAug20/lapdraw" target="_blank">GitHub Repository</a>
+        <span>·</span>
+        <a href="../newtab/newtab.html">Open Canvas</a>
+        <span>·</span>
+        <a href="../options/options.html">Options &amp; Keymap</a>
+      </div>
+    </footer>
+
+    <script src="../shared/intelligence.js"></script>
+    <script src="tutorial.js"></script>
+  </body>
+</html>
