@@ -242,3 +242,265 @@ html.lapdraw-on #lapdraw-root {
 .lapdraw-overlay-toast.show {
   opacity: 1;
 }
+
+.hidden {
+  display: none !important;
+}
+
+.lapdraw-btn.has-notes {
+  color: #ffb547;
+  border-color: #ffb547;
+  box-shadow: 0 0 6px rgba(255, 181, 71, 0.35);
+}
+
+/* Stamp Popover */
+.lapdraw-stamp-popover {
+  position: absolute;
+  left: 50%;
+  bottom: 58px;
+  transform: translateX(-50%);
+  background: rgba(14, 18, 24, 0.98);
+  border: 1px solid #242a31;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 92, 80, 0.2);
+  z-index: 2147483647;
+  min-width: 260px;
+  animation: overlayEditorPop 0.12s ease-out;
+}
+
+.stamp-popover-title {
+  font: 600 10px/1 "JetBrains Mono", monospace;
+  color: #77828e;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #242a31;
+}
+
+.stamp-popover-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stamp-choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: #10141a;
+  border: 1px solid #242a31;
+  border-left: 3px solid var(--c, #ff5c50);
+  border-radius: 3px;
+  color: #ccd4dc;
+  font: 11px "JetBrains Mono", monospace;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stamp-choice-btn:hover {
+  background: #19202a;
+  border-color: var(--c, #ff5c50);
+  color: var(--c, #ff5c50);
+}
+
+.stamp-icon {
+  font-weight: bold;
+}
+
+/* Stamp inline comment box */
+.lapdraw-stamp-comment-box {
+  position: absolute;
+  background: rgba(14, 18, 24, 0.98);
+  border: 1px solid #ff5c50;
+  border-radius: 5px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  z-index: 2147483647;
+  animation: overlayEditorPop 0.12s ease-out;
+}
+
+.stamp-comment-input {
+  background: #090b0e;
+  border: 1px solid #242a31;
+  color: #ccd4dc;
+  font: 11.5px "JetBrains Mono", monospace;
+  padding: 4px 6px;
+  border-radius: 3px;
+  outline: none;
+  width: 200px;
+}
+
+.stamp-comment-input:focus {
+  border-color: #ff5c50;
+}
+
+.stamp-comment-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.stamp-c-btn {
+  background: #14181d;
+  border: 1px solid #242a31;
+  color: #ccd4dc;
+  font: 10px "JetBrains Mono", monospace;
+  padding: 4px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.stamp-c-btn.save {
+  background: #ff5c50;
+  border-color: #ff5c50;
+  color: #0e1114;
+  font-weight: bold;
+}
+
+.stamp-c-btn.del {
+  border-color: #ff4757;
+  color: #ff4757;
+}
+
+/* Docs & PDF Notes Panel */
+.lapdraw-notes-panel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  bottom: 64px;
+  width: 320px;
+  background: rgba(14, 18, 24, 0.97);
+  border: 1px solid #242a31;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 8px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 92, 80, 0.25);
+  z-index: 2147483647;
+  animation: overlayEditorPop 0.15s ease-out;
+}
+
+.lapdraw-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #242a31;
+}
+
+.lapdraw-notes-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 11px/1 "JetBrains Mono", monospace;
+  color: #ff5c50;
+  letter-spacing: 0.5px;
+}
+
+.lapdraw-notes-close {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #77828e;
+  font: 11px "JetBrains Mono", monospace;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.lapdraw-notes-close:hover {
+  color: #ff5c50;
+  border-color: #242a31;
+  background: #14181d;
+}
+
+.lapdraw-notes-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font: 10px "JetBrains Mono", monospace;
+  color: #77828e;
+}
+
+.lapdraw-notes-url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+  color: #929da8;
+}
+
+.lapdraw-notes-status {
+  font-size: 9.5px;
+  color: #74c69d;
+}
+
+.lapdraw-notes-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.lapdraw-tag-btn {
+  background: #10141a;
+  border: 1px solid #242a31;
+  color: #ccd4dc;
+  font: 9.5px "JetBrains Mono", monospace;
+  padding: 2px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.lapdraw-tag-btn:hover {
+  border-color: #ff5c50;
+  color: #ff5c50;
+}
+
+.lapdraw-notes-area {
+  flex: 1;
+  background: #090b0e;
+  border: 1px solid #242a31;
+  border-radius: 4px;
+  color: #ccd4dc;
+  font: 12px/1.5 "JetBrains Mono", monospace;
+  padding: 8px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.lapdraw-notes-area:focus {
+  border-color: #ff5c50;
+}
+
+.lapdraw-notes-foot {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.lapdraw-notes-action {
+  background: #12161c;
+  border: 1px solid #242a31;
+  color: #ccd4dc;
+  font: 10px "JetBrains Mono", monospace;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.lapdraw-notes-action:hover {
+  border-color: #ff5c50;
+  color: #ff5c50;
+}
+
+.lapdraw-notes-action.del {
+  border-color: #ff4757;
+  color: #ff6b81;
+}
+
